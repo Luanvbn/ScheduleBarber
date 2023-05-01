@@ -1,5 +1,7 @@
 package br.com.schedulebarber.scheduleBarber.service;
 
+import br.com.schedulebarber.scheduleBarber.Exception.AccessAlreadyExistsException;
+import br.com.schedulebarber.scheduleBarber.Repository.AccessRepository;
 import br.com.schedulebarber.scheduleBarber.Repository.ClientRepository;
 import br.com.schedulebarber.scheduleBarber.model.Client;
 import br.com.schedulebarber.scheduleBarber.util.PaginationParams;
@@ -18,6 +20,9 @@ public class ClientService {
     @Autowired
     private ClientRepository clientRepository;
 
+    @Autowired
+    private AccessRepository accessRepository;
+
     public Client findClientByName(String name) {
         return clientRepository.findByName(name);
     }
@@ -32,6 +37,16 @@ public class ClientService {
 
     public Optional<Client> findClientById(Long id){
         return clientRepository.findById(id);
+    }
+
+    public Client SaveClient(Client client) throws AccessAlreadyExistsException{
+        if (accessRepository.existsByEmail(client.getAccess().getEmail())) {
+            throw new AccessAlreadyExistsException(("O Email já existe!"));
+
+        } else {
+            Client savedClient = clientRepository.save(client);
+            return savedClient;
+        }
     }
 
 

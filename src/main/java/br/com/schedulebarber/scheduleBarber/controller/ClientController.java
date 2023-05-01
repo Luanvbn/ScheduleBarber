@@ -1,14 +1,15 @@
 package br.com.schedulebarber.scheduleBarber.controller;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+import br.com.schedulebarber.scheduleBarber.Exception.AccessAlreadyExistsException;
 import br.com.schedulebarber.scheduleBarber.model.Client;
 import br.com.schedulebarber.scheduleBarber.service.ClientService;
 import br.com.schedulebarber.scheduleBarber.util.PaginationParams;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -35,6 +36,17 @@ public class ClientController {
     public ResponseEntity<Optional<Client>> findById(@PathVariable("id") Long id){
         Optional<Client> cliente = clientService.findClientById(id);
         return ResponseEntity.ok(cliente);
+    }
+    @PostMapping("/save")
+    public ResponseEntity<?> saveUser (@RequestBody Client client) {
+        try {
+            Client savedClient = clientService.SaveClient(client);
+            return ResponseEntity.ok(savedClient);
+        } catch (AccessAlreadyExistsException e) {
+            return ResponseEntity.badRequest().body("O Email já existe!");
+        } catch (Exception e) {
+            return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocorreu um erro ao salvar o cliente: " + e.getMessage());
+        }
     }
 
 
