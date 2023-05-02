@@ -2,6 +2,8 @@ package br.com.schedulebarber.scheduleBarber.controller;
 
 
 import br.com.schedulebarber.scheduleBarber.Exception.AccessAlreadyExistsException;
+import br.com.schedulebarber.scheduleBarber.Exception.AccessNotExistsException;
+import br.com.schedulebarber.scheduleBarber.Exception.ClientNotExistsException;
 import br.com.schedulebarber.scheduleBarber.model.Client;
 import br.com.schedulebarber.scheduleBarber.service.ClientService;
 import br.com.schedulebarber.scheduleBarber.util.PaginationParams;
@@ -48,6 +50,20 @@ public class ClientController {
             return  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocorreu um erro ao salvar o cliente: " + e.getMessage());
         }
     }
+
+    @PutMapping ("/update/{id}")
+    public ResponseEntity<Client> updateUser(@PathVariable Long id, @RequestBody Client cliente) throws AccessNotExistsException {
+        Client client = clientService.updateClient(id, cliente);
+        return ResponseEntity.ok().body(client);
+    }
+
+    @DeleteMapping("delete/{id}")
+    public ResponseEntity<Client> deleteUser (@PathVariable Long id) throws ClientNotExistsException {
+        Client client = clientService.deleteClient(id);
+        return ResponseEntity.ok().body(client);
+    }
+
+
 
 
 }
