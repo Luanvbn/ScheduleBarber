@@ -1,8 +1,8 @@
 package br.com.schedulebarber.scheduleBarber;
 
-import br.com.schedulebarber.scheduleBarber.model.Access;
-import br.com.schedulebarber.scheduleBarber.model.Client;
-import br.com.schedulebarber.scheduleBarber.model.Sex;
+import br.com.schedulebarber.scheduleBarber.Model.Access;
+import br.com.schedulebarber.scheduleBarber.Model.Client;
+import br.com.schedulebarber.scheduleBarber.Model.Sex;
 
 import java.time.LocalDate;
 

@@ -1,34 +1,35 @@
-package br.com.schedulebarber.scheduleBarber.model;
+package br.com.schedulebarber.scheduleBarber.Model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+
 @Entity
-public class Barber {
+public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
+
     private Sex sex;
-    private String phone;
-    private String address;
+
+    private LocalDate birthday;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "access_id", referencedColumnName = "id")
     private Access access;
 
-    public Barber(Long id, String name, Sex sex, String phone, String address, Access access) {
+    public Client(Long id, String name, Sex sex, LocalDate birthday, Access access) {
         this.id = id;
         this.name = name;
         this.sex = sex;
-        this.phone = phone;
-        this.address = address;
+        this.birthday = birthday;
         this.access = access;
     }
 
-    public Barber() {
-
+    public Client() {
     }
 
     public Long getId() {
@@ -55,20 +56,12 @@ public class Barber {
         this.sex = sex;
     }
 
-    public String getPhone() {
-        return phone;
+    public LocalDate getBirthday() {
+        return birthday;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
+    public void setBirthday(LocalDate birthday) {
+        this.birthday = birthday;
     }
 
     public Access getAccess() {
@@ -77,5 +70,16 @@ public class Barber {
 
     public void setAccess(Access access) {
         this.access = access;
+    }
+
+    @Override
+    public String toString() {
+        return "Client{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", sex=" + sex +
+                ", birthday=" + birthday +
+                ", access=" + access +
+                '}';
     }
 }

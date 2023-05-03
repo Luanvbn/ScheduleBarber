@@ -1,4 +1,4 @@
-package br.com.schedulebarber.scheduleBarber.model;
+package br.com.schedulebarber.scheduleBarber.Model;
 
 import jakarta.persistence.*;
 

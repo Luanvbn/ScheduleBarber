@@ -1,6 +1,6 @@
 package br.com.schedulebarber.scheduleBarber.Repository;
 
-import br.com.schedulebarber.scheduleBarber.model.Client;
+import br.com.schedulebarber.scheduleBarber.Model.Client;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

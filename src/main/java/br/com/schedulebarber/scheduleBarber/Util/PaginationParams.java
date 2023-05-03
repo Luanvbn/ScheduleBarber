@@ -1,4 +1,4 @@
-package br.com.schedulebarber.scheduleBarber.util;
+package br.com.schedulebarber.scheduleBarber.Util;
 
 public class PaginationParams {
 

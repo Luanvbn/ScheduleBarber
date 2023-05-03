@@ -1,12 +1,11 @@
 package br.com.schedulebarber.scheduleBarber.Repository;
 
-import br.com.schedulebarber.scheduleBarber.Model.Access;
+import br.com.schedulebarber.scheduleBarber.Model.Barber;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AccessRepository extends JpaRepository<Access, Long> {
+public interface BarberRepository extends JpaRepository<Barber, Long> {
 
-
-    boolean existsByEmail(String email);
+    Barber findByName(String name);
 }

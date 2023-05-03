@@ -1,12 +1,12 @@
-package br.com.schedulebarber.scheduleBarber.controller;
+package br.com.schedulebarber.scheduleBarber.Controller;
 
 
 import br.com.schedulebarber.scheduleBarber.Exception.AccessAlreadyExistsException;
 import br.com.schedulebarber.scheduleBarber.Exception.AccessNotExistsException;
 import br.com.schedulebarber.scheduleBarber.Exception.ClientNotExistsException;
-import br.com.schedulebarber.scheduleBarber.model.Client;
-import br.com.schedulebarber.scheduleBarber.service.ClientService;
-import br.com.schedulebarber.scheduleBarber.util.PaginationParams;
+import br.com.schedulebarber.scheduleBarber.Model.Client;
+import br.com.schedulebarber.scheduleBarber.Service.ClientService;
+import br.com.schedulebarber.scheduleBarber.Util.PaginationParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
