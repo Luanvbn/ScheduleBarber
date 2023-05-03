@@ -1,7 +1,6 @@
 package br.com.schedulebarber.scheduleBarber.Service;
 
 import br.com.schedulebarber.scheduleBarber.Exception.AccessAlreadyExistsException;
-import br.com.schedulebarber.scheduleBarber.Exception.AccessNotExistsException;
 import br.com.schedulebarber.scheduleBarber.Exception.ClientNotExistsException;
 import br.com.schedulebarber.scheduleBarber.Repository.AccessRepository;
 import br.com.schedulebarber.scheduleBarber.Repository.ClientRepository;
@@ -25,8 +24,13 @@ public class ClientService {
     @Autowired
     private AccessRepository accessRepository;
 
-    public Client findClientByName(String name) {
-        return clientRepository.findByName(name);
+    public Client findClientByName(String name) throws ClientNotExistsException {
+        Client client = clientRepository.findByName(name);
+        if(client != null){
+            return clientRepository.findByName(name);
+        } else {
+            throw new ClientNotExistsException();
+        }
     }
 
     public Page<Client> findAllClients(PaginationParams params) {
@@ -37,32 +41,41 @@ public class ClientService {
         return clients;
     }
 
-    public Optional<Client> findClientById(Long id) {
-        return clientRepository.findById(id);
+    public Optional<Client> findClientById(Long id) throws ClientNotExistsException {
+        Optional<Client> client = clientRepository.findById(id);
+        if(client.isPresent()){
+            return clientRepository.findById(id);
+        } else {
+            throw new ClientNotExistsException();
+        }
     }
 
     public Client SaveClient(Client client) throws AccessAlreadyExistsException {
         if (accessRepository.existsByEmail(client.getAccess().getEmail())) {
-            throw new AccessAlreadyExistsException(("O Email já existe!"));
+            throw new AccessAlreadyExistsException();
         } else {
+            Client roleClient = client;
+            roleClient.getAccess().setRole("");
             Client savedClient = clientRepository.save(client);
             return savedClient;
         }
     }
 
-    public Client updateClient(Long id, Client client) throws  AccessNotExistsException {
-            Optional<Client> cliente = clientRepository.findById(id);
-        if(accessRepository.existsByEmail(cliente.get().getAccess().getEmail())) {
-            cliente.get().setName(client.getName());
-            cliente.get().setBirthday(client.getBirthday());
-            cliente.get().setSex(client.getSex());
-            cliente.get().getAccess().setEmail(client.getAccess().getEmail());
-            cliente.get().getAccess().setPassword(client.getAccess().getPassword());
+    public Client updateClient(Long id, Client client) throws ClientNotExistsException {
+            Optional<Client> clientOptional = clientRepository.findById(id);
+            Client existingClient = clientOptional.orElseThrow(ClientNotExistsException::new);
 
-            Client clienteSave = cliente.get();
+        if(accessRepository.existsByEmail(existingClient.getAccess().getEmail())) {
+            existingClient.setName(client.getName());
+            existingClient.setBirthday(client.getBirthday());
+            existingClient.setSex(client.getSex());
+            existingClient.getAccess().setEmail(client.getAccess().getEmail());
+            existingClient.getAccess().setPassword(client.getAccess().getPassword());
+
+            Client clienteSave = clientRepository.save(existingClient);
             return clientRepository.save(clienteSave);
         } else {
-            throw new AccessNotExistsException(("O cliente não existe!!!"));
+            throw new ClientNotExistsException();
         }
     }
 
@@ -73,7 +86,7 @@ public class ClientService {
             clientRepository.deleteById(id);
             return existingClient;
         } else {
-            throw new ClientNotExistsException(("O cliente não existe!!!"));
+            throw new ClientNotExistsException();
         }
     }
 

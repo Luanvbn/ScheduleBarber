@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AccessRepository extends JpaRepository<Access, Long> {
 
-
     boolean existsByEmail(String email);
+    
 }
