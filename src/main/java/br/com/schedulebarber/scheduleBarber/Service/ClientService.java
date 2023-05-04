@@ -55,7 +55,7 @@ public class ClientService {
             throw new AccessAlreadyExistsException();
         } else {
             Client roleClient = client;
-            roleClient.getAccess().setRole("");
+            roleClient.getAccess().setRole("CLIENT");
             Client savedClient = clientRepository.save(client);
             return savedClient;
         }
@@ -64,19 +64,35 @@ public class ClientService {
     public Client updateClient(Long id, Client client) throws ClientNotExistsException {
             Optional<Client> clientOptional = clientRepository.findById(id);
             Client existingClient = clientOptional.orElseThrow(ClientNotExistsException::new);
+        if(clientOptional.isPresent()){
 
-        if(accessRepository.existsByEmail(existingClient.getAccess().getEmail())) {
-            existingClient.setName(client.getName());
-            existingClient.setBirthday(client.getBirthday());
-            existingClient.setSex(client.getSex());
-            existingClient.getAccess().setEmail(client.getAccess().getEmail());
-            existingClient.getAccess().setPassword(client.getAccess().getPassword());
+            if(accessRepository.existsByEmail(clientOptional.get().getAccess().getEmail())) {
+                if(client.getName() != null) {
+                    existingClient.setName(client.getName());
+                }
+                if(client.getBirthday() != null ) {
+                    existingClient.setBirthday(client.getBirthday());
+                }
+                if (client.getSex() != null) {
+                    existingClient.setSex(client.getSex());
+                }
 
-            Client clienteSave = clientRepository.save(existingClient);
-            return clientRepository.save(clienteSave);
+                if(client.getAccess() != null) {
+                    if (client.getAccess().getEmail() != null) {
+                        existingClient.getAccess().setEmail(client.getAccess().getEmail());
+                    }
+                    if (client.getAccess().getPassword() != null) {
+                        existingClient.getAccess().setPassword(client.getAccess().getPassword());
+                    }
+                }
+
+                Client clienteSave = clientRepository.save(existingClient);
+                return clientRepository.save(clienteSave);
+            }
         } else {
             throw new ClientNotExistsException();
         }
+        throw new ClientNotExistsException();
     }
 
     public Client deleteClient(Long id) throws ClientNotExistsException {
