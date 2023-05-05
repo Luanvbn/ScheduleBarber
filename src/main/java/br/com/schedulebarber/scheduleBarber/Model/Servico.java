@@ -14,8 +14,12 @@ public class Servico {
 
     private Double valorServico;
 
+    @ManyToOne
+    private Barber barber;
+
     @ManyToMany(mappedBy = "servicos")
     private List<Scheduling> schedules;
+
 
     public Servico(Long id, String nomeServico, Double valorServico, List<Scheduling> schedules) {
         this.id = id;

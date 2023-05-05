@@ -3,6 +3,7 @@ package br.com.schedulebarber.scheduleBarber.Model;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 public class Barber {
@@ -17,18 +18,22 @@ public class Barber {
     private String address;
     private LocalDate birthday;
 
+    @OneToMany(mappedBy = "barber")
+    private List<Servico> servicos;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "access_id", referencedColumnName = "id")
     private Access access;
 
-    public Barber(Long id, String name, Sex sex, String phone, String address, LocalDate birthday, Access access) {
+    public Barber(Long id, String name, Sex sex, String phone, String address, LocalDate birthday, List<Servico> servicos, Access access) {
         this.id = id;
         this.name = name;
         this.sex = sex;
         this.phone = phone;
         this.address = address;
-        this.access = access;
         this.birthday = birthday;
+        this.servicos = servicos;
+        this.access = access;
     }
 
     public Barber() {
@@ -89,5 +94,13 @@ public class Barber {
 
     public void setBirthday(LocalDate birthday) {
         this.birthday = birthday;
+    }
+
+    public List<Servico> getServicos() {
+        return servicos;
+    }
+
+    public void setServicos(List<Servico> servicos) {
+        this.servicos = servicos;
     }
 }
