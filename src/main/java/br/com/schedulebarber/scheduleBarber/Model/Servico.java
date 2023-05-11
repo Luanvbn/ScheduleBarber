@@ -15,16 +15,18 @@ public class Servico {
     private Double valorServico;
 
     @ManyToOne
+    @JoinColumn(name = "barber_id")
     private Barber barber;
 
     @ManyToMany(mappedBy = "servicos")
     private List<Scheduling> schedules;
 
 
-    public Servico(Long id, String nomeServico, Double valorServico, List<Scheduling> schedules) {
+    public Servico(Long id, String nomeServico, Double valorServico, Barber barber, List<Scheduling> schedules) {
         this.id = id;
         this.nomeServico = nomeServico;
         this.valorServico = valorServico;
+        this.barber = barber;
         this.schedules = schedules;
     }
 
@@ -61,5 +63,13 @@ public class Servico {
 
     public void setSchedules(List<Scheduling> schedules) {
         this.schedules = schedules;
+    }
+
+    public Barber getBarber() {
+        return barber;
+    }
+
+    public void setBarber(Barber barber) {
+        this.barber = barber;
     }
 }

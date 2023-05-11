@@ -1,7 +1,9 @@
 package br.com.schedulebarber.scheduleBarber.Service;
 
 import br.com.schedulebarber.scheduleBarber.Exception.ServicoNotExistsException;
+import br.com.schedulebarber.scheduleBarber.Model.Barber;
 import br.com.schedulebarber.scheduleBarber.Model.Servico;
+import br.com.schedulebarber.scheduleBarber.Repository.BarberRepository;
 import br.com.schedulebarber.scheduleBarber.Repository.ServicoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,12 +16,33 @@ public class ServicoService {
     @Autowired
     private ServicoRepository servicoRepository;
 
+    @Autowired
+    private BarberRepository barberRepository;
+
     public Optional<Servico> findServicetById(Long id) throws ServicoNotExistsException {
         Optional<Servico> servicoOptional = servicoRepository.findById(id);
-        if(servicoOptional.isPresent()){
+        if (servicoOptional.isPresent()) {
             return servicoRepository.findById(id);
         } else {
             throw new ServicoNotExistsException();
+        }
+    }
+
+    public Servico createServico(Long id, Servico servico) throws ServicoNotExistsException {
+        if (servicoRepository.existsByNomeServico(servico.getNomeServico())) {
+            throw new ServicoNotExistsException();
+        } else {
+            Optional<Barber> optionalBarber = barberRepository.findById(id);
+            if (optionalBarber.isPresent()) {
+                Barber barber = optionalBarber.get();
+                Servico servicoSaved = new Servico();
+                servicoSaved.setNomeServico(servico.getNomeServico());
+                servicoSaved.setValorServico(servico.getValorServico());
+                servicoSaved.setBarber(barber);
+                return servicoRepository.save(servicoSaved);
+            } else {
+                throw new ServicoNotExistsException();
+            }
         }
     }
 }

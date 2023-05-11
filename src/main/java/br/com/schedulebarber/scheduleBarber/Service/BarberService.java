@@ -61,6 +61,8 @@ public class BarberService {
         }
     }
 
+
+
     public Barber updateBarber(Long id, Barber barber) throws BarberNotExistsException {
         Optional<Barber> barberOptional = barberRepository.findById(id);
         Barber existingBarber = barberOptional.orElseThrow(BarberNotExistsException::new);
@@ -81,6 +83,10 @@ public class BarberService {
                 }
                 if (barber.getPhone() != null) {
                     existingBarber.setPhone(barber.getPhone());
+                }
+
+                if(barber.getServicos() != null) {
+                    existingBarber.setServicos(barber.getServicos());
                 }
                  if(barber.getAccess() != null) {
                     if (barber.getAccess().getEmail() != null) {
