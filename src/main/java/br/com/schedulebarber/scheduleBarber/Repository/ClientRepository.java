@@ -9,7 +9,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long> {
 
-    Client findByName(String name);
+    Client findByNameContainingIgnoreCase(String name);
+
     Page<Client> findAll(Pageable pageable);
 
     void deleteById(Long id);

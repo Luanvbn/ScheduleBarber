@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static br.com.schedulebarber.scheduleBarber.Util.RemovedAcent.removerAcento;
+
 @Service
 public class ClientService {
 
@@ -25,9 +27,9 @@ public class ClientService {
     private AccessRepository accessRepository;
 
     public Client findClientByName(String name) throws ClientNotExistsException {
-        Client client = clientRepository.findByName(name);
+        Client client = clientRepository.findByNameContainingIgnoreCase(name);
         if(client != null){
-            return clientRepository.findByName(name);
+            return clientRepository.findByNameContainingIgnoreCase(name);
         } else {
             throw new ClientNotExistsException();
         }
@@ -55,8 +57,9 @@ public class ClientService {
             throw new AccessAlreadyExistsException();
         } else {
             Client roleClient = client;
+            roleClient.setName(removerAcento(client.getName()));
             roleClient.getAccess().setRole("CLIENT");
-            Client savedClient = clientRepository.save(client);
+            Client savedClient = clientRepository.save(roleClient);
             return savedClient;
         }
     }
@@ -68,7 +71,7 @@ public class ClientService {
 
             if(accessRepository.existsByEmail(clientOptional.get().getAccess().getEmail())) {
                 if(client.getName() != null) {
-                    existingClient.setName(client.getName());
+                    existingClient.setName(removerAcento(client.getName()));
                 }
                 if(client.getBirthday() != null ) {
                     existingClient.setBirthday(client.getBirthday());

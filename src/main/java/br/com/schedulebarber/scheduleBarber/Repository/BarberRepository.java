@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BarberRepository extends JpaRepository<Barber, Long> {
 
-    Barber findByName(String name);
+    Barber findByNameContainingIgnoreCase(String name);
 
     boolean existsByServicos(String nomeServico);
 

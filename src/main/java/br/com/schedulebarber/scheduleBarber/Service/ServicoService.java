@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static br.com.schedulebarber.scheduleBarber.Util.RemovedAcent.removerAcento;
+
 @Service
 public class ServicoService {
 
@@ -39,12 +41,48 @@ public class ServicoService {
                 }
             }
             Servico servicoSaved = new Servico();
-            servicoSaved.setNomeServico(servico.getNomeServico());
+            servicoSaved.setNomeServico(removerAcento(servico.getNomeServico()));
             servicoSaved.setValorServico(servico.getValorServico());
             servicoSaved.setBarber(barber);
             return servicoRepository.save(servicoSaved);
         } else {
             throw new ServicoAlreadyExistsException();
+        }
+    }
+
+    public Servico updateServico(Long id, Servico servico) throws ServicoNotExistsException {
+        Optional<Servico> servicoOptional = servicoRepository.findById(id);
+        Servico existingServico = servicoOptional.orElseThrow(ServicoNotExistsException::new);
+
+        if (servicoRepository.existsByNomeServico(servicoOptional.get().getNomeServico())) {
+            if (servico.getNomeServico() != null) {
+                existingServico.setNomeServico(removerAcento(servico.getNomeServico()));
+            }
+            if (servico.getValorServico() != null) {
+                existingServico.setValorServico(servico.getValorServico());
+            }
+            if (servico.getBarber() != null) {
+                existingServico.setBarber(servico.getBarber());
+            }
+            if(servico.getSchedules() != null) {
+                existingServico.setSchedules(servico.getSchedules());
+            }
+
+            Servico servicoSave = servicoRepository.save(existingServico);
+            return servicoRepository.save(servicoSave);
+        } else {
+            throw new ServicoNotExistsException();
+        }
+    }
+
+    public Servico deleteServico(Long id) throws ServicoNotExistsException {
+        Optional<Servico> servicoOptional = servicoRepository.findById(id);
+        if(servicoOptional.isPresent()) {
+            Servico servicoExisting = servicoOptional.get();
+            servicoRepository.deleteById(id);
+            return servicoExisting;
+        } else {
+            throw new ServicoNotExistsException();
         }
     }
 }

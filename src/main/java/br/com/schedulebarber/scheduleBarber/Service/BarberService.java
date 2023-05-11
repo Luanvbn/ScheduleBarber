@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static br.com.schedulebarber.scheduleBarber.Util.RemovedAcent.removerAcento;
+
 @Service
 public class BarberService {
 
@@ -25,9 +27,9 @@ public class BarberService {
     public AccessRepository accessRepository;
 
     public Barber findClientByName(String name) throws BarberNotExistsException {
-        Barber barber = barberRepository.findByName(name);
-        if(barber != null){
-            return barberRepository.findByName(name);
+        Barber barber = barberRepository.findByNameContainingIgnoreCase(name);
+        if (barber != null) {
+            return barberRepository.findByNameContainingIgnoreCase(name);
         } else {
             throw new BarberNotExistsException();
         }
@@ -43,7 +45,7 @@ public class BarberService {
 
     public Optional<Barber> findClientById(Long id) throws BarberNotExistsException {
         Optional<Barber> barberOptional = barberRepository.findById(id);
-        if(barberOptional.isPresent()){
+        if (barberOptional.isPresent()) {
             return barberRepository.findById(id);
         } else {
             throw new BarberNotExistsException();
@@ -56,23 +58,23 @@ public class BarberService {
         } else {
             Barber roleBarber = barber;
             roleBarber.getAccess().setRole("BARBER");
+            roleBarber.setName(removerAcento(barber.getName()));
             Barber savedBarber = barberRepository.save(roleBarber);
             return savedBarber;
         }
     }
 
 
-
     public Barber updateBarber(Long id, Barber barber) throws BarberNotExistsException {
         Optional<Barber> barberOptional = barberRepository.findById(id);
         Barber existingBarber = barberOptional.orElseThrow(BarberNotExistsException::new);
-        if(barberOptional.isPresent()){
+        if (barberOptional.isPresent()) {
 
-            if(accessRepository.existsByEmail(barberOptional.get().getAccess().getEmail())) {
-                if(barber.getName() != null) {
-                    existingBarber.setName(barber.getName());
+            if (accessRepository.existsByEmail(barberOptional.get().getAccess().getEmail())) {
+                if (barber.getName() != null) {
+                    existingBarber.setName(removerAcento(barber.getName()));
                 }
-                if(barber.getBirthday() != null ) {
+                if (barber.getBirthday() != null) {
                     existingBarber.setBirthday(barber.getBirthday());
                 }
                 if (barber.getSex() != null) {
@@ -85,10 +87,10 @@ public class BarberService {
                     existingBarber.setPhone(barber.getPhone());
                 }
 
-                if(barber.getServicos() != null) {
+                if (barber.getServicos() != null) {
                     existingBarber.setServicos(barber.getServicos());
                 }
-                 if(barber.getAccess() != null) {
+                if (barber.getAccess() != null) {
                     if (barber.getAccess().getEmail() != null) {
                         existingBarber.getAccess().setEmail(barber.getAccess().getEmail());
                     }
@@ -108,7 +110,7 @@ public class BarberService {
 
     public Barber deleteBarber(Long id) throws BarberNotExistsException {
         Optional<Barber> barberOptional = barberRepository.findById(id);
-        if(barberOptional.isPresent()) {
+        if (barberOptional.isPresent()) {
             Barber existingBarber = barberOptional.get();
             barberRepository.deleteById(id);
             return existingBarber;
