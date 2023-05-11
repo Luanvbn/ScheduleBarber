@@ -1,5 +1,6 @@
 package br.com.schedulebarber.scheduleBarber.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -19,6 +20,7 @@ public class Barber {
     private LocalDate birthday;
 
     @OneToMany(mappedBy = "barber")
+    @JsonIgnoreProperties("barber")
     private List<Servico> servicos;
 
     @OneToOne(cascade = CascadeType.ALL)

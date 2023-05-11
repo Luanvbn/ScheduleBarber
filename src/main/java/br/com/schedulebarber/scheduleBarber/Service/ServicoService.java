@@ -1,5 +1,6 @@
 package br.com.schedulebarber.scheduleBarber.Service;
 
+import br.com.schedulebarber.scheduleBarber.Exception.ServicoAlreadyExistsException;
 import br.com.schedulebarber.scheduleBarber.Exception.ServicoNotExistsException;
 import br.com.schedulebarber.scheduleBarber.Model.Barber;
 import br.com.schedulebarber.scheduleBarber.Model.Servico;
@@ -28,21 +29,22 @@ public class ServicoService {
         }
     }
 
-    public Servico createServico(Long id, Servico servico) throws ServicoNotExistsException {
-        if (servicoRepository.existsByNomeServico(servico.getNomeServico())) {
-            throw new ServicoNotExistsException();
-        } else {
-            Optional<Barber> optionalBarber = barberRepository.findById(id);
-            if (optionalBarber.isPresent()) {
-                Barber barber = optionalBarber.get();
-                Servico servicoSaved = new Servico();
-                servicoSaved.setNomeServico(servico.getNomeServico());
-                servicoSaved.setValorServico(servico.getValorServico());
-                servicoSaved.setBarber(barber);
-                return servicoRepository.save(servicoSaved);
-            } else {
-                throw new ServicoNotExistsException();
+    public Servico createServico(Long id, Servico servico) throws ServicoAlreadyExistsException {
+        Optional<Barber> optionalBarber = barberRepository.findById(id);
+        if (optionalBarber.isPresent()) {
+            Barber barber = optionalBarber.get();
+            for (Servico existingServico : barber.getServicos()) {
+                if (existingServico.getNomeServico().equals(servico.getNomeServico())) {
+                    throw new ServicoAlreadyExistsException();
+                }
             }
+            Servico servicoSaved = new Servico();
+            servicoSaved.setNomeServico(servico.getNomeServico());
+            servicoSaved.setValorServico(servico.getValorServico());
+            servicoSaved.setBarber(barber);
+            return servicoRepository.save(servicoSaved);
+        } else {
+            throw new ServicoAlreadyExistsException();
         }
     }
 }

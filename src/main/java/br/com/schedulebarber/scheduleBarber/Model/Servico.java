@@ -1,5 +1,6 @@
 package br.com.schedulebarber.scheduleBarber.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class Servico {
 
     @ManyToOne
     @JoinColumn(name = "barber_id")
+    @JsonBackReference
     private Barber barber;
 
     @ManyToMany(mappedBy = "servicos")

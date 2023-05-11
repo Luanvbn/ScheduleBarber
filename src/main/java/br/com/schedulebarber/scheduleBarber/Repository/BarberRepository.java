@@ -10,5 +10,8 @@ import org.springframework.stereotype.Repository;
 public interface BarberRepository extends JpaRepository<Barber, Long> {
 
     Barber findByName(String name);
+
+    boolean existsByServicos(String nomeServico);
+
     Page<Barber> findAll(Pageable pageable);
 }
