@@ -70,8 +70,20 @@ public class ExceptionHandlerAdvice {
     }
 
     @ExceptionHandler(ServicoAlreadyExistsException.class)
-    public ResponseEntity<Map<String, Object>> ServicoAlreadyExistsException(ServicoAlreadyExistsException ex) {
+    public ResponseEntity<Map<String, Object>> handleServicoAlreadyExistsException(ServicoAlreadyExistsException ex) {
         String mensagem = "O Servico já existe!";
+        int codigo = HttpStatus.NOT_FOUND.value();
+        String detalhes = ex.getMessage();
+        Map<String, Object> error = new HashMap<>();
+        error.put("mensagem", mensagem);
+        error.put("codigo", codigo);
+        error.put("detalhes", detalhes);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(AccessNotExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessNotExistsException(AccessNotExistsException ex) {
+        String mensagem = "O Acesso não existe";
         int codigo = HttpStatus.NOT_FOUND.value();
         String detalhes = ex.getMessage();
         Map<String, Object> error = new HashMap<>();
