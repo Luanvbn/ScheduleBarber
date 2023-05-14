@@ -105,6 +105,18 @@ public class ExceptionHandlerAdvice {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(BarberDoesNotHaveService.class)
+    public ResponseEntity<Map<String, Object>> handleBarberDoesNotHaveService(BarberDoesNotHaveService ex) {
+        String mensagem = "O Barbeiro não tem o serviço";
+        int codigo = HttpStatus.NOT_FOUND.value();
+        String detalhes = ex.getMessage();
+        Map<String, Object> error = new HashMap<>();
+        error.put("mensagem", mensagem);
+        error.put("codigo", codigo);
+        error.put("detalhes", detalhes);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
 
 
 

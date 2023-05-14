@@ -13,5 +13,8 @@ public interface BarberRepository extends JpaRepository<Barber, Long> {
 
     boolean existsByServicos(String nomeServico);
 
+    boolean existsByIdAndServicosId(Long barberId, Long servicoId);
+
+
     Page<Barber> findAll(Pageable pageable);
 }

@@ -1,11 +1,17 @@
 package br.com.schedulebarber.scheduleBarber.Service;
 
 
-import br.com.schedulebarber.scheduleBarber.Exception.SchedulingNotExistsException;
+import br.com.schedulebarber.scheduleBarber.Exception.*;
 import br.com.schedulebarber.scheduleBarber.Model.Barber;
+import br.com.schedulebarber.scheduleBarber.Model.Client;
 import br.com.schedulebarber.scheduleBarber.Model.Scheduling;
+import br.com.schedulebarber.scheduleBarber.Model.Servico;
+import br.com.schedulebarber.scheduleBarber.Repository.BarberRepository;
+import br.com.schedulebarber.scheduleBarber.Repository.ClientRepository;
 import br.com.schedulebarber.scheduleBarber.Repository.SchedulingRepository;
+import br.com.schedulebarber.scheduleBarber.Repository.ServicoRepository;
 import br.com.schedulebarber.scheduleBarber.Util.PaginationParams;
+import br.com.schedulebarber.scheduleBarber.Util.SchedulingRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,6 +27,15 @@ public class SchedulingService {
 
     @Autowired
     public SchedulingRepository schedulingRepository;
+
+    @Autowired
+    public ClientRepository clientRepository;
+
+    @Autowired
+    public BarberRepository barberRepository;
+
+    @Autowired
+    public ServicoRepository servicoRepository;
 
     public Optional<Scheduling> findSchedulingById(Long id) throws SchedulingNotExistsException {
         Optional<Scheduling> optionalScheduling = schedulingRepository.findById(id);
@@ -36,5 +52,32 @@ public class SchedulingService {
         Pageable pageable = PageRequest.of(params.getPage(), params.getSize(), sort);
         Page<Scheduling> schedulings = schedulingRepository.findAll((Pageable) pageable);
         return schedulings;
+    }
+
+    public Scheduling createScheduling(SchedulingRequest schedulingRequest) throws ClientNotExistsException, BarberNotExistsException, BarberDoesNotHaveService {
+        Client client = clientRepository.findById(schedulingRequest.getClientId()).orElseThrow(ClientNotExistsException::new);
+        Barber barber = barberRepository.findById(schedulingRequest.getBarberId()).orElseThrow(BarberNotExistsException::new);
+        List<Servico> servicos = servicoRepository.findByIdIn(schedulingRequest.getServiceIds());
+
+        boolean hasService = !servicos.isEmpty();
+        for(Servico servico: servicos){
+            if(!servico.getBarber().equals(barber)) {
+                throw new BarberDoesNotHaveService("Serviço " + servico.getNomeServico() + "não pertence ao barbeiro selecionado" );
+            }
+        }
+
+        if(hasService) {
+
+            Scheduling saveScheduling = new Scheduling();
+            saveScheduling.setClient(client);
+            saveScheduling.setBarber(barber);
+            saveScheduling.setDataInicio(schedulingRequest.getScheduling().getDataInicio());
+            saveScheduling.setDatafim(schedulingRequest.getScheduling().getDatafim());
+            saveScheduling.setServicos(servicos);
+
+            return schedulingRepository.save(saveScheduling);
+        } else {
+            throw new BarberDoesNotHaveService("Algum(s) dos serviços não pertence ao barbeiro selecionado");
+        }
     }
 }
