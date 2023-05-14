@@ -27,19 +27,19 @@ public class AccessController {
     }
 
     @PostMapping("/createAccess")
-    public ResponseEntity<?> saveAccess (@RequestBody Access access) throws AccessAlreadyExistsException {
+    public ResponseEntity<?> saveAccess(@RequestBody Access access) throws AccessAlreadyExistsException {
         Access savedAccess = accessService.createAdmin(access);
         return ResponseEntity.ok(savedAccess);
     }
 
-    @PutMapping ("/update/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Access> updateAccess(@PathVariable Long id, @RequestBody Access body) throws AccessNotExistsException {
         Access access = accessService.updateAccess(id, body);
         return ResponseEntity.ok().body(access);
     }
 
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<Access> deleteAccess (@PathVariable Long id) throws AccessNotExistsException {
+    public ResponseEntity<Access> deleteAccess(@PathVariable Long id) throws AccessNotExistsException {
         Access access = accessService.deleteAccess(id);
         return ResponseEntity.ok().body(access);
     }

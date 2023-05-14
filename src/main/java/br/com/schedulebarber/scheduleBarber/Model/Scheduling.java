@@ -1,5 +1,6 @@
 package br.com.schedulebarber.scheduleBarber.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -13,9 +14,11 @@ public class Scheduling {
     private Long id;
 
     @ManyToOne
+    @JsonIgnoreProperties("access")
     private Client client;
 
     @ManyToOne
+    @JsonIgnoreProperties({"servicos", "access"})
     private Barber barber;
 
     private LocalDateTime dataInicio;
@@ -28,6 +31,7 @@ public class Scheduling {
             joinColumns = @JoinColumn(name = "scheduling_id"),
             inverseJoinColumns = @JoinColumn(name = "service_id")
     )
+    @JsonIgnoreProperties("schedules")
     private List<Servico> servicos;
 
     public Scheduling() {

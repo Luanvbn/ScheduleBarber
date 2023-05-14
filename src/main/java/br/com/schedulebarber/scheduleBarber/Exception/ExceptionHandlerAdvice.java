@@ -93,6 +93,18 @@ public class ExceptionHandlerAdvice {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(SchedulingNotExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleSchedulingNotExistsException(SchedulingNotExistsException ex) {
+        String mensagem = "O Agendamento não existe";
+        int codigo = HttpStatus.NOT_FOUND.value();
+        String detalhes = ex.getMessage();
+        Map<String, Object> error = new HashMap<>();
+        error.put("mensagem", mensagem);
+        error.put("codigo", codigo);
+        error.put("detalhes", detalhes);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
 
 
 
