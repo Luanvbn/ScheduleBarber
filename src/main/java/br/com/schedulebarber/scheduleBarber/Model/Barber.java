@@ -20,7 +20,7 @@ public class Barber {
     private LocalDate birthday;
 
     @OneToMany(mappedBy = "barber")
-    @JsonIgnoreProperties("barber")
+    @JsonIgnoreProperties({"barber", "schedules"})
     private List<Servico> servicos;
 
     @OneToOne(cascade = CascadeType.ALL)

@@ -12,8 +12,10 @@ import static br.com.schedulebarber.scheduleBarber.Util.RemovedAcent.removerAcen
 public class Test {
     public static void main(String[] args) {
 
+        LocalDateTime dateTime1 = LocalDateTime.now();
+        LocalDateTime dateTime2 = LocalDateTime.of(2023,04,07, 14,45);
 
-        System.out.println(removerAcento("José Luís"));
+        System.out.println(dateTime1.isAfter(dateTime2));
 
 
     }
