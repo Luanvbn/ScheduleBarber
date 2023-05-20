@@ -33,7 +33,7 @@ public class SchedulingController {
     }
 
     @PostMapping("/createScheduling")
-    public ResponseEntity<?> saveSchedulling (@RequestBody SchedulingRequest scheduling) throws AccessAlreadyExistsException, BarberNotExistsException, ClientNotExistsException, BarberDoesNotHaveService {
+    public ResponseEntity<?> saveSchedulling (@RequestBody SchedulingRequest scheduling) throws BarberNotExistsException, ClientNotExistsException, BarberDoesNotHaveService, SchedulingConflictException {
         Scheduling schedulingCreate = schedulingService.createScheduling(scheduling);
         return ResponseEntity.ok(schedulingCreate);
     }

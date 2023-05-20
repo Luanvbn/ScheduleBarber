@@ -19,6 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.xml.crypto.Data;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,7 +41,7 @@ public class SchedulingService {
 
     public Optional<Scheduling> findSchedulingById(Long id) throws SchedulingNotExistsException {
         Optional<Scheduling> optionalScheduling = schedulingRepository.findById(id);
-        if(optionalScheduling.isPresent()){
+        if (optionalScheduling.isPresent()) {
             return schedulingRepository.findById(id);
         } else {
             throw new SchedulingNotExistsException();
@@ -50,23 +52,34 @@ public class SchedulingService {
         Sort sort = params.getSortOrder().equalsIgnoreCase("asc") ?
                 Sort.by(params.getSortProperty()).ascending() : Sort.by(params.getSortProperty()).descending();
         Pageable pageable = PageRequest.of(params.getPage(), params.getSize(), sort);
-        Page<Scheduling> schedulings = schedulingRepository.findAll((Pageable) pageable);
-        return schedulings;
+        return schedulingRepository.findAll(pageable);
     }
 
-    public Scheduling createScheduling(SchedulingRequest schedulingRequest) throws ClientNotExistsException, BarberNotExistsException, BarberDoesNotHaveService {
+    public Scheduling createScheduling(SchedulingRequest schedulingRequest) throws ClientNotExistsException, BarberNotExistsException, BarberDoesNotHaveService, SchedulingConflictException {
         Client client = clientRepository.findById(schedulingRequest.getClientId()).orElseThrow(ClientNotExistsException::new);
         Barber barber = barberRepository.findById(schedulingRequest.getBarberId()).orElseThrow(BarberNotExistsException::new);
         List<Servico> servicos = servicoRepository.findByIdIn(schedulingRequest.getServiceIds());
 
         boolean hasService = !servicos.isEmpty();
-        for(Servico servico: servicos){
-            if(!servico.getBarber().equals(barber)) {
-                throw new BarberDoesNotHaveService("Serviço " + servico.getNomeServico() + "não pertence ao barbeiro selecionado" );
+        for (Servico servico : servicos) {
+            if (!servico.getBarber().equals(barber)) {
+                throw new BarberDoesNotHaveService("Serviço " + servico.getNomeServico() + "não pertence ao barbeiro selecionado");
             }
         }
 
-        if(hasService) {
+        if (hasService) {
+            LocalDateTime DataInicio = schedulingRequest.getScheduling().getDataInicio();
+            LocalDateTime DataFim = schedulingRequest.getScheduling().getDatafim();
+
+            List<Scheduling> existingSchedulings = schedulingRepository.findByBarber(barber);
+            for (Scheduling existingScheduling : existingSchedulings) {
+                LocalDateTime existingDataInicio = existingScheduling.getDataInicio();
+                LocalDateTime existingDataFim = existingScheduling.getDatafim();
+                if (DataInicio.isBefore(existingDataFim) && DataFim.isAfter(existingDataInicio)) {
+                    throw new SchedulingConflictException("Já existe um agendamento no mesmo período");
+                }
+            }
+
 
             Scheduling saveScheduling = new Scheduling();
             saveScheduling.setClient(client);

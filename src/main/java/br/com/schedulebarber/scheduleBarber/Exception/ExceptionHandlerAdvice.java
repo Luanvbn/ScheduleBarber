@@ -117,6 +117,18 @@ public class ExceptionHandlerAdvice {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(SchedulingConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleSchedulingConflictException(SchedulingConflictException ex) {
+        String mensagem = "Já tem um agendamento neste horario";
+        int codigo = HttpStatus.NOT_FOUND.value();
+        String detalhes = ex.getMessage();
+        Map<String, Object> error = new HashMap<>();
+        error.put("mensagem", mensagem);
+        error.put("codigo", codigo);
+        error.put("detalhes", detalhes);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
 
 
 
