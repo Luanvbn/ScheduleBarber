@@ -2,6 +2,8 @@ package br.com.schedulebarber.scheduleBarber.Controller;
 
 
 import br.com.schedulebarber.scheduleBarber.Exception.*;
+import br.com.schedulebarber.scheduleBarber.Model.Barber;
+import br.com.schedulebarber.scheduleBarber.Model.Client;
 import br.com.schedulebarber.scheduleBarber.Model.Scheduling;
 import br.com.schedulebarber.scheduleBarber.Service.SchedulingService;
 import br.com.schedulebarber.scheduleBarber.Util.PaginationParams;
@@ -36,6 +38,18 @@ public class SchedulingController {
     public ResponseEntity<?> saveSchedulling (@RequestBody SchedulingRequest scheduling) throws BarberNotExistsException, ClientNotExistsException, BarberDoesNotHaveService, SchedulingConflictException {
         Scheduling schedulingCreate = schedulingService.createScheduling(scheduling);
         return ResponseEntity.ok(schedulingCreate);
+    }
+
+    @PutMapping ("/update/{id}")
+    public ResponseEntity<?> updateScheduling(@PathVariable Long id, @RequestBody SchedulingRequest schedulingRequest) throws SchedulingNotExistsException, BarberNotExistsException, ClientNotExistsException, BarberDoesNotHaveService, SchedulingConflictException {
+        Scheduling schedulingUpdated = schedulingService.updateScheduling(id, schedulingRequest);
+        return ResponseEntity.ok().body(schedulingUpdated);
+    }
+
+    @DeleteMapping("delete/{id}")
+    public ResponseEntity<Scheduling> deleteScheduling (@PathVariable Long id) throws SchedulingNotExistsException {
+        Scheduling scheduling = schedulingService.schedulingDelete(id);
+        return ResponseEntity.ok().body(scheduling);
     }
 
 }
