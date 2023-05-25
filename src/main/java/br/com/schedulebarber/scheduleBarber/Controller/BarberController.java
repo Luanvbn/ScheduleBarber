@@ -25,7 +25,7 @@ public class BarberController {
         return ResponseEntity.ok(barber);
     }
     @PostMapping("/findAllBarber")
-    public ResponseEntity<Page<Barber>> findAllClients(@RequestBody() PaginationParams params) {
+    public ResponseEntity<Page<Barber>> findAllBarber(@RequestBody() PaginationParams params) {
         Page<Barber> barbers = barberService.findAllBarber(params);
         return ResponseEntity.ok(barbers);
 
