@@ -8,8 +8,12 @@ import br.com.schedulebarber.scheduleBarber.Model.Access;
 import br.com.schedulebarber.scheduleBarber.Model.Barber;
 import br.com.schedulebarber.scheduleBarber.Model.Client;
 import br.com.schedulebarber.scheduleBarber.Repository.AccessRepository;
+import br.com.schedulebarber.scheduleBarber.Util.BcryptUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -22,11 +26,14 @@ public class AccessService {
     @Autowired
     public AccessRepository accessRepository;
 
+
     public Access createAdmin(Access access) throws AccessAlreadyExistsException {
         if (accessRepository.existsByEmail(access.getEmail())) {
             throw new AccessAlreadyExistsException();
         } else {
             Access accessSaved = access;
+            accessSaved.setPassword(BcryptUtils.encode(access.getPassword()));
+
             accessSaved.setRole("ADMIN");
             return accessRepository.save(accessSaved);
         }
@@ -49,7 +56,7 @@ public class AccessService {
             existingAccess.setEmail(removerAcento(access.getEmail()));
         }
         if (access.getPassword() != null) {
-            existingAccess.setPassword(access.getPassword());
+            existingAccess.setPassword(BcryptUtils.encode(access.getPassword()));
         }
 
         Access accessSave = accessRepository.save(existingAccess);

@@ -5,6 +5,7 @@ import br.com.schedulebarber.scheduleBarber.Exception.BarberNotExistsException;
 import br.com.schedulebarber.scheduleBarber.Model.Barber;
 import br.com.schedulebarber.scheduleBarber.Repository.AccessRepository;
 import br.com.schedulebarber.scheduleBarber.Repository.BarberRepository;
+import br.com.schedulebarber.scheduleBarber.Util.BcryptUtils;
 import br.com.schedulebarber.scheduleBarber.Util.PaginationParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -57,6 +58,7 @@ public class BarberService {
             throw new AccessAlreadyExistsException();
         } else {
             Barber roleBarber = barber;
+            roleBarber.getAccess().setPassword(BcryptUtils.encode(barber.getAccess().getPassword()));
             roleBarber.getAccess().setRole("BARBER");
             roleBarber.setName(removerAcento(barber.getName()));
             Barber savedBarber = barberRepository.save(roleBarber);
@@ -95,7 +97,7 @@ public class BarberService {
                         existingBarber.getAccess().setEmail(barber.getAccess().getEmail());
                     }
                     if (barber.getAccess().getPassword() != null) {
-                        existingBarber.getAccess().setPassword(barber.getAccess().getPassword());
+                        existingBarber.getAccess().setPassword(BcryptUtils.encode(barber.getAccess().getPassword()));
                     }
                 }
 

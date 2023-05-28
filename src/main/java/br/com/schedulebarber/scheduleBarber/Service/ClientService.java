@@ -5,6 +5,7 @@ import br.com.schedulebarber.scheduleBarber.Exception.ClientNotExistsException;
 import br.com.schedulebarber.scheduleBarber.Repository.AccessRepository;
 import br.com.schedulebarber.scheduleBarber.Repository.ClientRepository;
 import br.com.schedulebarber.scheduleBarber.Model.Client;
+import br.com.schedulebarber.scheduleBarber.Util.BcryptUtils;
 import br.com.schedulebarber.scheduleBarber.Util.PaginationParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -58,6 +59,7 @@ public class ClientService {
         } else {
             Client roleClient = client;
             roleClient.setName(removerAcento(client.getName()));
+            roleClient.getAccess().setPassword(BcryptUtils.encode(client.getAccess().getPassword()));
             roleClient.getAccess().setRole("CLIENT");
             Client savedClient = clientRepository.save(roleClient);
             return savedClient;
@@ -85,7 +87,7 @@ public class ClientService {
                         existingClient.getAccess().setEmail(client.getAccess().getEmail());
                     }
                     if (client.getAccess().getPassword() != null) {
-                        existingClient.getAccess().setPassword(client.getAccess().getPassword());
+                        existingClient.getAccess().setPassword(BcryptUtils.encode(client.getAccess().getPassword()));
                     }
                 }
 
