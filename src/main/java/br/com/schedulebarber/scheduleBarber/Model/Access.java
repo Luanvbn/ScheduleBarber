@@ -1,9 +1,8 @@
 package br.com.schedulebarber.scheduleBarber.Model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
+import java.util.Set;
 
 @Entity
 public class Access {
@@ -16,13 +15,19 @@ public class Access {
 
     private String password;
 
-    private String role;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name="Access_Role",
+            joinColumns = {@JoinColumn(name="id")},
+            inverseJoinColumns = {@JoinColumn(name="roleId")}
+    )
+    private Set<Role> authorities;
 
-    public Access(Long id, String email, String password, String role) {
+    public Access(Long id, String email, String password, Set<Role> authorities) {
         this.id = id;
         this.email = email;
         this.password = password;
-        this.role = role;
+        this.authorities = authorities;
     }
 
     public Access() {
@@ -53,12 +58,12 @@ public class Access {
         this.password = password;
     }
 
-    public String getRole() {
-        return role;
+    public Set<Role> getAuthorities() {
+        return authorities;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setAuthorities(Set<Role> authorities) {
+        this.authorities = authorities;
     }
 
     @Override
@@ -67,7 +72,7 @@ public class Access {
                 "id=" + id +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", role='" + role + '\'' +
+                ", authorities=" + authorities +
                 '}';
     }
 }

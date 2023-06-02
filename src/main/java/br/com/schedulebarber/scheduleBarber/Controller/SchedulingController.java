@@ -23,13 +23,13 @@ public class SchedulingController {
     private SchedulingService schedulingService;
 
     @PostMapping("/findAllScheduling")
-    public ResponseEntity<Page<Scheduling>> findAllScheduling(@RequestBody PaginationParams params){
+    public ResponseEntity<?>  findAllScheduling(@RequestBody PaginationParams params){
         Page<Scheduling> schedulings = schedulingService.findAllScheduling(params);
         return ResponseEntity.ok(schedulings);
     }
 
     @GetMapping("/id/{id}")
-    public ResponseEntity<Optional<Scheduling>> findById(@PathVariable("id") Long id) throws SchedulingNotExistsException {
+    public ResponseEntity<?>  findById(@PathVariable("id") Long id) throws SchedulingNotExistsException {
         Optional<Scheduling> scheduling = schedulingService.findSchedulingById(id);
         return ResponseEntity.ok(scheduling);
     }
@@ -47,7 +47,7 @@ public class SchedulingController {
     }
 
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<Scheduling> deleteScheduling (@PathVariable Long id) throws SchedulingNotExistsException {
+    public ResponseEntity<?>  deleteScheduling (@PathVariable Long id) throws SchedulingNotExistsException {
         Scheduling scheduling = schedulingService.schedulingDelete(id);
         return ResponseEntity.ok().body(scheduling);
     }

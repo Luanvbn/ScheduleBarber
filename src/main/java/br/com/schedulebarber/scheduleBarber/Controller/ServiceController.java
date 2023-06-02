@@ -19,7 +19,7 @@ public class ServiceController {
 
 
     @GetMapping("/id/{id}")
-    public ResponseEntity<Optional<Servico>> findById(@PathVariable("id") Long id) throws ServicoNotExistsException {
+    public ResponseEntity<?>  findById(@PathVariable("id") Long id) throws ServicoNotExistsException {
         Optional<Servico> servico = servicoService.findServicetById(id);
         return ResponseEntity.ok(servico);
     }
@@ -37,7 +37,7 @@ public class ServiceController {
     }
 
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<Servico> deleteService (@PathVariable Long id) throws ServicoNotExistsException {
+    public ResponseEntity<?>  deleteService (@PathVariable Long id) throws ServicoNotExistsException {
         Servico servico = servicoService.deleteServico(id);
         return ResponseEntity.ok().body(servico);
     }

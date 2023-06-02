@@ -3,8 +3,10 @@ package br.com.schedulebarber.scheduleBarber.Service;
 import br.com.schedulebarber.scheduleBarber.Exception.AccessAlreadyExistsException;
 import br.com.schedulebarber.scheduleBarber.Exception.BarberNotExistsException;
 import br.com.schedulebarber.scheduleBarber.Model.Barber;
+import br.com.schedulebarber.scheduleBarber.Model.Role;
 import br.com.schedulebarber.scheduleBarber.Repository.AccessRepository;
 import br.com.schedulebarber.scheduleBarber.Repository.BarberRepository;
+import br.com.schedulebarber.scheduleBarber.Repository.RoleRepository;
 import br.com.schedulebarber.scheduleBarber.Util.BcryptUtils;
 import br.com.schedulebarber.scheduleBarber.Util.PaginationParams;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static br.com.schedulebarber.scheduleBarber.Util.RemovedAcent.removerAcento;
 
@@ -26,6 +30,9 @@ public class BarberService {
 
     @Autowired
     public AccessRepository accessRepository;
+
+    @Autowired
+    public RoleRepository roleRepository;
 
     public Barber findClientByName(String name) throws BarberNotExistsException {
         Barber barber = barberRepository.findByNameContainingIgnoreCase(name);
@@ -58,8 +65,11 @@ public class BarberService {
             throw new AccessAlreadyExistsException();
         } else {
             Barber roleBarber = barber;
+            Role role = roleRepository.findByAuthority("BARBER");
+            Set<Role> roles = new HashSet<>();
+            roles.add(role);
+            roleBarber.getAccess().setAuthorities(roles);
             roleBarber.getAccess().setPassword(BcryptUtils.encode(barber.getAccess().getPassword()));
-            roleBarber.getAccess().setRole("BARBER");
             roleBarber.setName(removerAcento(barber.getName()));
             Barber savedBarber = barberRepository.save(roleBarber);
             return savedBarber;

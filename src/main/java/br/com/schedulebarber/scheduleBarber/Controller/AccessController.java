@@ -21,7 +21,7 @@ public class AccessController {
     private AccessService accessService;
 
     @GetMapping("/id/{id}")
-    public ResponseEntity<Optional<Access>> findById(@PathVariable("id") Long id) throws AccessNotExistsException {
+    public ResponseEntity<?>  findById(@PathVariable("id") Long id) throws AccessNotExistsException {
         Optional<Access> access = accessService.findAccessById(id);
         return ResponseEntity.ok(access);
     }
@@ -33,13 +33,13 @@ public class AccessController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Access> updateAccess(@PathVariable Long id, @RequestBody Access body) throws AccessNotExistsException {
+    public ResponseEntity<?>  updateAccess(@PathVariable Long id, @RequestBody Access body) throws AccessNotExistsException {
         Access access = accessService.updateAccess(id, body);
         return ResponseEntity.ok().body(access);
     }
 
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<Access> deleteAccess(@PathVariable Long id) throws AccessNotExistsException {
+    public ResponseEntity<?>  deleteAccess(@PathVariable Long id) throws AccessNotExistsException {
         Access access = accessService.deleteAccess(id);
         return ResponseEntity.ok().body(access);
     }

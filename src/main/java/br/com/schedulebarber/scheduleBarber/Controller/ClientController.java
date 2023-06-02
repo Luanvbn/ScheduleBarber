@@ -21,19 +21,19 @@ public class ClientController {
     private ClientService clientService;
 
     @GetMapping ("/name/{name}")
-    public ResponseEntity<Client> findClientByName(@PathVariable("name") String name) throws ClientNotExistsException {
+    public ResponseEntity<?>  findClientByName(@PathVariable("name") String name) throws ClientNotExistsException {
         Client cliente = clientService.findClientByName(name);
         return ResponseEntity.ok(cliente);
     }
 
     @PostMapping ("/findAllClient")
-    public ResponseEntity<Page<Client>> findAllClients(@RequestBody() PaginationParams params) {
+    public ResponseEntity<?>  findAllClients(@RequestBody() PaginationParams params) {
         Page<Client> clients = clientService.findAllClients(params);
         return ResponseEntity.ok(clients);
 
     }
     @GetMapping("/id/{id}")
-    public ResponseEntity<Optional<Client>> findById(@PathVariable("id") Long id) throws ClientNotExistsException {
+    public ResponseEntity<?>  findById(@PathVariable("id") Long id) throws ClientNotExistsException {
         Optional<Client> cliente = clientService.findClientById(id);
         return ResponseEntity.ok(cliente);
     }
@@ -44,13 +44,13 @@ public class ClientController {
     }
 
     @PutMapping ("/update/{id}")
-    public ResponseEntity<Client> updateUser(@PathVariable Long id, @RequestBody Client cliente) throws ClientNotExistsException {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Client cliente) throws ClientNotExistsException {
         Client client = clientService.updateClient(id, cliente);
         return ResponseEntity.ok().body(client);
     }
 
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<Client> deleteUser (@PathVariable Long id) throws ClientNotExistsException {
+    public ResponseEntity<?>  deleteUser (@PathVariable Long id) throws ClientNotExistsException {
         Client client = clientService.deleteClient(id);
         return ResponseEntity.ok().body(client);
     }

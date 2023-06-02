@@ -2,9 +2,11 @@ package br.com.schedulebarber.scheduleBarber.Service;
 
 import br.com.schedulebarber.scheduleBarber.Exception.AccessAlreadyExistsException;
 import br.com.schedulebarber.scheduleBarber.Exception.ClientNotExistsException;
+import br.com.schedulebarber.scheduleBarber.Model.Role;
 import br.com.schedulebarber.scheduleBarber.Repository.AccessRepository;
 import br.com.schedulebarber.scheduleBarber.Repository.ClientRepository;
 import br.com.schedulebarber.scheduleBarber.Model.Client;
+import br.com.schedulebarber.scheduleBarber.Repository.RoleRepository;
 import br.com.schedulebarber.scheduleBarber.Util.BcryptUtils;
 import br.com.schedulebarber.scheduleBarber.Util.PaginationParams;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.*;
 
 import static br.com.schedulebarber.scheduleBarber.Util.RemovedAcent.removerAcento;
 
@@ -26,6 +28,9 @@ public class ClientService {
 
     @Autowired
     private AccessRepository accessRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     public Client findClientByName(String name) throws ClientNotExistsException {
         Client client = clientRepository.findByNameContainingIgnoreCase(name);
@@ -58,9 +63,12 @@ public class ClientService {
             throw new AccessAlreadyExistsException();
         } else {
             Client roleClient = client;
+            Role role = roleRepository.findByAuthority("CLIENT");
+            Set<Role> roles = new HashSet<>();
+            roles.add(role);
+            roleClient.getAccess().setAuthorities(roles);
             roleClient.setName(removerAcento(client.getName()));
             roleClient.getAccess().setPassword(BcryptUtils.encode(client.getAccess().getPassword()));
-            roleClient.getAccess().setRole("CLIENT");
             Client savedClient = clientRepository.save(roleClient);
             return savedClient;
         }
