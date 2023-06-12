@@ -34,23 +34,6 @@ public class AccessService {
     public RoleRepository roleRepository;
 
 
-    public Access createAdmin(Access access) throws AccessAlreadyExistsException {
-        if (accessRepository.existsByEmail(access.getEmail())) {
-            throw new AccessAlreadyExistsException();
-        } else {
-            Access accessSaved = access;
-
-            Role role = roleRepository.findByAuthority("ADMIN");
-            Set<Role> roles = new HashSet<>();
-            roles.add(role);
-
-            accessSaved.setAuthorities(roles);
-            accessSaved.setPassword(BcryptUtils.encode(access.getPassword()));
-
-            return accessRepository.save(accessSaved);
-        }
-    }
-
     public Optional<Access> findAccessById(Long id) throws AccessNotExistsException {
         Optional<Access> accessOptional = accessRepository.findById(id);
         if (accessOptional.isPresent()) {

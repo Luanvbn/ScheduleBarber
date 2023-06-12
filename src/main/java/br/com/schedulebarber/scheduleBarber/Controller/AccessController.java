@@ -26,12 +26,6 @@ public class AccessController {
         return ResponseEntity.ok(access);
     }
 
-    @PostMapping("/createAccess")
-    public ResponseEntity<?> saveAccess(@RequestBody Access access) throws AccessAlreadyExistsException {
-        Access savedAccess = accessService.createAdmin(access);
-        return ResponseEntity.ok(savedAccess);
-    }
-
     @PutMapping("/update/{id}")
     public ResponseEntity<?>  updateAccess(@PathVariable Long id, @RequestBody Access body) throws AccessNotExistsException {
         Access access = accessService.updateAccess(id, body);

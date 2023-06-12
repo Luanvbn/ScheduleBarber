@@ -32,24 +32,28 @@ public class BarberController {
 
     }
     @GetMapping("/id/{id}")
-    @PreAuthorize("hasAuthority('ROLE_BARBER')")
+    @PreAuthorize("hasAnyRole('BARBER', 'ADMIN')")
     public ResponseEntity<?>  findById(@PathVariable("id") Long id) throws BarberNotExistsException {
         Optional<Barber> barber = barberService.findClientById(id);
         return ResponseEntity.ok(barber);
     }
     @PostMapping("/save")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> saveUser (@RequestBody Barber barber) throws AccessAlreadyExistsException {
         Barber savedBarber = barberService.SaveBarber(barber);
         return ResponseEntity.ok(savedBarber);
     }
 
+
     @PutMapping ("/update/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'BARBER')")
     public ResponseEntity<?>  updateUser(@PathVariable Long id, @RequestBody Barber body) throws BarberNotExistsException {
         Barber barber = barberService.updateBarber(id, body);
         return ResponseEntity.ok().body(barber);
     }
 
     @DeleteMapping("delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?>  deleteUser (@PathVariable Long id) throws BarberNotExistsException {
         Barber barber = barberService.deleteBarber(id);
         return ResponseEntity.ok().body(barber);
