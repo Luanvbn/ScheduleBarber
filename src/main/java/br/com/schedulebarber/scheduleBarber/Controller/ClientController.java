@@ -4,13 +4,16 @@ package br.com.schedulebarber.scheduleBarber.Controller;
 import br.com.schedulebarber.scheduleBarber.Exception.AccessAlreadyExistsException;
 import br.com.schedulebarber.scheduleBarber.Exception.ClientNotExistsException;
 import br.com.schedulebarber.scheduleBarber.Model.Client;
+import br.com.schedulebarber.scheduleBarber.Model.Scheduling;
 import br.com.schedulebarber.scheduleBarber.Service.ClientService;
 import br.com.schedulebarber.scheduleBarber.Util.PaginationParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -53,6 +56,12 @@ public class ClientController {
     public ResponseEntity<?>  deleteUser (@PathVariable Long id) throws ClientNotExistsException {
         Client client = clientService.deleteClient(id);
         return ResponseEntity.ok().body(client);
+    }
+
+    @GetMapping("/getscheduling/{id}")
+    public ResponseEntity<?> getAgendamentoClientById(@PathVariable Long id) {
+        List<Scheduling> scheduling = clientService.getAgendamentosDoCliente(id);
+        return ResponseEntity.ok().body(scheduling);
     }
 
 

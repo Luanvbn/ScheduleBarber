@@ -3,10 +3,12 @@ package br.com.schedulebarber.scheduleBarber.Service;
 import br.com.schedulebarber.scheduleBarber.Exception.AccessAlreadyExistsException;
 import br.com.schedulebarber.scheduleBarber.Exception.ClientNotExistsException;
 import br.com.schedulebarber.scheduleBarber.Model.Role;
+import br.com.schedulebarber.scheduleBarber.Model.Scheduling;
 import br.com.schedulebarber.scheduleBarber.Repository.AccessRepository;
 import br.com.schedulebarber.scheduleBarber.Repository.ClientRepository;
 import br.com.schedulebarber.scheduleBarber.Model.Client;
 import br.com.schedulebarber.scheduleBarber.Repository.RoleRepository;
+import br.com.schedulebarber.scheduleBarber.Repository.SchedulingRepository;
 import br.com.schedulebarber.scheduleBarber.Util.BcryptUtils;
 import br.com.schedulebarber.scheduleBarber.Util.PaginationParams;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,9 @@ public class ClientService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private SchedulingRepository schedulingRepository;
 
     public Client findClientByName(String name) throws ClientNotExistsException {
         Client client = clientRepository.findByNameContainingIgnoreCase(name);
@@ -118,6 +123,15 @@ public class ClientService {
             throw new ClientNotExistsException();
         }
     }
+
+    public List<Scheduling> getAgendamentosDoCliente(Long clientId) {
+        Client client = new Client();
+        client.setId(clientId);
+
+        return schedulingRepository.findByClient(client);
+    }
+
+
 
 
 }
