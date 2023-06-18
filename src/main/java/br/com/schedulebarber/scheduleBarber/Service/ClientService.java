@@ -63,21 +63,6 @@ public class ClientService {
         }
     }
 
-    public Client SaveClient(Client client) throws AccessAlreadyExistsException {
-        if (accessRepository.existsByEmail(client.getAccess().getEmail())) {
-            throw new AccessAlreadyExistsException();
-        } else {
-            Client roleClient = client;
-            Role role = roleRepository.findByAuthority("CLIENT");
-            Set<Role> roles = new HashSet<>();
-            roles.add(role);
-            roleClient.getAccess().setAuthorities(roles);
-            roleClient.setName(removerAcento(client.getName()));
-            roleClient.getAccess().setPassword(BcryptUtils.encode(client.getAccess().getPassword()));
-            Client savedClient = clientRepository.save(roleClient);
-            return savedClient;
-        }
-    }
 
     public Client updateClient(Long id, Client client) throws ClientNotExistsException {
             Optional<Client> clientOptional = clientRepository.findById(id);

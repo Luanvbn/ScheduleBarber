@@ -54,7 +54,7 @@ public class BarberService {
         Sort sort = params.getSortOrder().equalsIgnoreCase("asc") ?
                 Sort.by(params.getSortProperty()).ascending() : Sort.by(params.getSortProperty()).descending();
         Pageable pageable = PageRequest.of(params.getPage(), params.getSize(), sort);
-        Page<Barber> barbers = barberRepository.findAll((Pageable) pageable);
+        Page<Barber> barbers = barberRepository.findAll(pageable);
         return barbers;
     }
 
@@ -64,22 +64,6 @@ public class BarberService {
             return barberRepository.findById(id);
         } else {
             throw new BarberNotExistsException();
-        }
-    }
-
-    public Barber SaveBarber(Barber barber) throws AccessAlreadyExistsException {
-        if (accessRepository.existsByEmail(barber.getAccess().getEmail())) {
-            throw new AccessAlreadyExistsException();
-        } else {
-            Barber roleBarber = barber;
-            Role role = roleRepository.findByAuthority("BARBER");
-            Set<Role> roles = new HashSet<>();
-            roles.add(role);
-            roleBarber.getAccess().setAuthorities(roles);
-            roleBarber.getAccess().setPassword(BcryptUtils.encode(barber.getAccess().getPassword()));
-            roleBarber.setName(removerAcento(barber.getName()));
-            Barber savedBarber = barberRepository.save(roleBarber);
-            return savedBarber;
         }
     }
 

@@ -10,7 +10,6 @@ import br.com.schedulebarber.scheduleBarber.Util.PaginationParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,12 +39,6 @@ public class ClientController {
         Optional<Client> cliente = clientService.findClientById(id);
         return ResponseEntity.ok(cliente);
     }
-    @PostMapping("/save")
-    public ResponseEntity<?> saveUser (@RequestBody Client client) throws AccessAlreadyExistsException {
-            Client savedClient = clientService.SaveClient(client);
-            return ResponseEntity.ok(savedClient);
-    }
-
     @PutMapping ("/update/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Client cliente) throws ClientNotExistsException {
         Client client = clientService.updateClient(id, cliente);
@@ -59,7 +52,7 @@ public class ClientController {
     }
 
     @GetMapping("/getscheduling/{id}")
-    public ResponseEntity<?> getAgendamentoClientById(@PathVariable Long id) {
+    public ResponseEntity<?> getAgendamentoClient(@PathVariable Long id) {
         List<Scheduling> scheduling = clientService.getAgendamentosDoCliente(id);
         return ResponseEntity.ok().body(scheduling);
     }

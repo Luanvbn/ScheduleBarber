@@ -41,13 +41,6 @@ public class BarberController {
         return ResponseEntity.ok(barber);
     }
 
-    @PostMapping("/save")
-    public ResponseEntity<?> saveUser(@RequestBody Barber barber) throws AccessAlreadyExistsException {
-        Barber savedBarber = barberService.SaveBarber(barber);
-        return ResponseEntity.ok(savedBarber);
-    }
-
-
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Barber body) throws BarberNotExistsException {
         Barber barber = barberService.updateBarber(id, body);
@@ -61,7 +54,7 @@ public class BarberController {
     }
 
     @GetMapping("/getscheduling/{id}")
-    public ResponseEntity<?> getAgendamentoClientById(@PathVariable Long id) {
+    public ResponseEntity<?> getAgendamentoBarber(@PathVariable Long id) {
         List<Scheduling> scheduling = barberService.getAgendamentosDoBarbeiro(id);
         return ResponseEntity.ok().body(scheduling);
     }
