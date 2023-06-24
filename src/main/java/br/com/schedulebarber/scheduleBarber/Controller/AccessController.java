@@ -15,6 +15,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/access")
+@CrossOrigin
 public class AccessController {
 
     @Autowired
