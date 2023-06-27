@@ -83,7 +83,7 @@ public class ExceptionHandlerAdvice {
 
     @ExceptionHandler(AccessNotExistsException.class)
     public ResponseEntity<Map<String, Object>> handleAccessNotExistsException(AccessNotExistsException ex) {
-        String mensagem = "O Acesso não existe";
+        String mensagem = "Login ou senha invalido";
         int codigo = HttpStatus.NOT_FOUND.value();
         String detalhes = ex.getMessage();
         Map<String, Object> error = new HashMap<>();

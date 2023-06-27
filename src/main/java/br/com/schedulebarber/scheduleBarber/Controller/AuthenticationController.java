@@ -5,8 +5,10 @@ import br.com.schedulebarber.scheduleBarber.DTO.AuthenticationRequest;
 import br.com.schedulebarber.scheduleBarber.DTO.AuthenticationResponse;
 import br.com.schedulebarber.scheduleBarber.DTO.RegisterRequest;
 import br.com.schedulebarber.scheduleBarber.Exception.AccessAlreadyExistsException;
+import br.com.schedulebarber.scheduleBarber.Exception.AccessNotExistsException;
 import br.com.schedulebarber.scheduleBarber.Model.Barber;
 import br.com.schedulebarber.scheduleBarber.Model.Client;
+import br.com.schedulebarber.scheduleBarber.Repository.AccessRepository;
 import br.com.schedulebarber.scheduleBarber.Service.AuthenticationService;
 import br.com.schedulebarber.scheduleBarber.Service.BarberService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenticationController {
 
     private final AuthenticationService service;
+
+    @Autowired
+    public AccessRepository accessRepository;
 
     public AuthenticationController(AuthenticationService service) {
         this.service = service;
@@ -36,8 +41,14 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authentication(@RequestBody AuthenticationRequest authentication) {
-        return ResponseEntity.ok(service.authenticate(authentication));
+    public ResponseEntity<AuthenticationResponse> authentication(@RequestBody AuthenticationRequest authentication) throws AccessNotExistsException {
+        if (!accessRepository.existsByEmail(authentication.getEmail())) {
+            throw new AccessNotExistsException();
+        } else{
+            return ResponseEntity.ok(service.authenticate(authentication));
+
+        }
+
     }
 
 }
