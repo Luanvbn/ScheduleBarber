@@ -79,7 +79,7 @@ public class AuthenticationService {
             Access access = new Access();
             access.setEmail(barber.getAccess().getEmail());
             access.setPassword(passwordEncoder.encode(barber.getAccess().getPassword()));
-            Role role = roleRepository.findByAuthority("CLIENT");
+            Role role = roleRepository.findByAuthority("BARBER");
             Set<Role> roles = new HashSet<>();
             roles.add(role);
             access.setAuthorities(roles);
