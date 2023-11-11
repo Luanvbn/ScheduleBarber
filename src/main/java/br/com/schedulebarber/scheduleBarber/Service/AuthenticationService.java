@@ -4,6 +4,8 @@ import br.com.schedulebarber.scheduleBarber.DTO.AuthenticationRequest;
 import br.com.schedulebarber.scheduleBarber.DTO.AuthenticationResponse;
 import br.com.schedulebarber.scheduleBarber.DTO.RegisterRequest;
 import br.com.schedulebarber.scheduleBarber.Exception.AccessAlreadyExistsException;
+import br.com.schedulebarber.scheduleBarber.Exception.AccessNotExistsException;
+import br.com.schedulebarber.scheduleBarber.Exception.AccessNotFoundException;
 import br.com.schedulebarber.scheduleBarber.Model.Access;
 import br.com.schedulebarber.scheduleBarber.Model.Barber;
 import br.com.schedulebarber.scheduleBarber.Model.Client;
@@ -13,14 +15,12 @@ import br.com.schedulebarber.scheduleBarber.Repository.BarberRepository;
 import br.com.schedulebarber.scheduleBarber.Repository.ClientRepository;
 import br.com.schedulebarber.scheduleBarber.Repository.RoleRepository;
 import br.com.schedulebarber.scheduleBarber.Security.JwtService;
-import br.com.schedulebarber.scheduleBarber.Util.BcryptUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import static br.com.schedulebarber.scheduleBarber.Util.RemovedAcent.removerAcento;
@@ -49,85 +49,66 @@ public class AuthenticationService {
     @Autowired
     public ClientRepository clientRepository;
 
-    public AuthenticationResponse register(RegisterRequest request) throws AccessAlreadyExistsException {
-        if (accessRepository.existsByEmail(request.getEmail())) {
+    public final String ROLE_CLIENT = "CLIENT";
+    public final String ROLE_BARBER = "BARBER";
+
+    private void validateEmailNotExist(String email) throws AccessAlreadyExistsException {
+        if (accessRepository.existsByEmail(email)) {
             throw new AccessAlreadyExistsException();
-        } else {
-            Access access = new Access();
-            access.setEmail(request.getEmail());
-            access.setPassword(passwordEncoder.encode(request.getPassword()));
-            Role role = roleRepository.findByAuthority("CLIENT");
-            Set<Role> roles = new HashSet<>();
-            roles.add(role);
-            access.setAuthorities(roles);
-            accessRepository.save(access);
-
-            var jwtToken = jwtService.generateToken(access);
-
-            AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-            authenticationResponse.setToken(jwtToken);
-
-            return authenticationResponse;
         }
+    }
+
+    private AuthenticationResponse createAuthenticationResponse(Access access) {
+        var jwtToken = jwtService.generateToken(access);
+        return new AuthenticationResponse(jwtToken);
+    }
+
+    private Access createAccess(String email, String password, String roleAuthority) {
+        Access access = new Access();
+        access.setEmail(email);
+        access.setPassword(passwordEncoder.encode(password));
+        Role role = roleRepository.findByAuthority(roleAuthority);
+        access.setAuthorities(Set.of(role));
+        return access;
+    }
+
+    public AuthenticationResponse register(RegisterRequest request) throws AccessAlreadyExistsException {
+        validateEmailNotExist(request.getEmail());
+
+        Access access = createAccess(request.getEmail(), request.getPassword(), ROLE_CLIENT);
+        accessRepository.save(access);
+
+        return createAuthenticationResponse(access);
     }
 
     public AuthenticationResponse registerBarber(Barber barber) throws AccessAlreadyExistsException {
-        if (accessRepository.existsByEmail(barber.getAccess().getEmail())) {
-            throw new AccessAlreadyExistsException();
-        } else {
+        validateEmailNotExist(barber.getAccess().getEmail());
 
-            Access access = new Access();
-            access.setEmail(barber.getAccess().getEmail());
-            access.setPassword(passwordEncoder.encode(barber.getAccess().getPassword()));
-            Role role = roleRepository.findByAuthority("BARBER");
-            Set<Role> roles = new HashSet<>();
-            roles.add(role);
-            access.setAuthorities(roles);
+        Access access = createAccess(barber.getAccess().getEmail(), barber.getAccess().getPassword(), ROLE_BARBER);
+        barber.setAccess(access);
+        barber.setName(removerAcento(barber.getName()));
+        barberRepository.save(barber);
 
-            Barber roleBarber = barber;
-            roleBarber.setAccess(access);
-            roleBarber.setName(removerAcento(barber.getName()));
-            barberRepository.save(roleBarber);
-
-
-            var jwtToken = jwtService.generateToken(access);
-
-            AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-            authenticationResponse.setToken(jwtToken);
-
-            return authenticationResponse;
-        }
+        return createAuthenticationResponse(access);
     }
 
     public AuthenticationResponse registerClient(Client client) throws AccessAlreadyExistsException {
-        if (accessRepository.existsByEmail(client.getAccess().getEmail())) {
-            throw new AccessAlreadyExistsException();
-        } else {
+        validateEmailNotExist(client.getAccess().getEmail());
 
-            Access access = new Access();
-            access.setEmail(client.getAccess().getEmail());
-            access.setPassword(passwordEncoder.encode(client.getAccess().getPassword()));
-            Role role = roleRepository.findByAuthority("CLIENT");
-            Set<Role> roles = new HashSet<>();
-            roles.add(role);
-            access.setAuthorities(roles);
+        Access access = createAccess(client.getAccess().getEmail(), client.getAccess().getPassword(), ROLE_CLIENT);
+        client.setAccess(access);
+        client.setName(removerAcento(client.getName()));
+        clientRepository.save(client);
 
-            Client roleClient = client;
-            roleClient.setAccess(access);
-            roleClient.setName(removerAcento(client.getName()));
-            clientRepository.save(roleClient);
-
-
-            var jwtToken = jwtService.generateToken(access);
-
-            AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-            authenticationResponse.setToken(jwtToken);
-
-            return authenticationResponse;
-        }
+        return createAuthenticationResponse(access);
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+
+    public AuthenticationResponse authenticate(AuthenticationRequest request) throws AccessNotExistsException, AccessNotFoundException {
+        if (!accessRepository.existsByEmail(request.getEmail())) {
+            throw new AccessNotExistsException();
+        }
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );

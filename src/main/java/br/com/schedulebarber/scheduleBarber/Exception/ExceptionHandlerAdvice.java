@@ -93,6 +93,11 @@ public class ExceptionHandlerAdvice {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(AccessNotFoundException.class)
+    public ResponseEntity<String> handleAccessNotFoundException(AccessNotExistsException e) {
+        return ResponseEntity.status(401).body("Access not found");
+    }
+
     @ExceptionHandler(SchedulingNotExistsException.class)
     public ResponseEntity<Map<String, Object>> handleSchedulingNotExistsException(SchedulingNotExistsException ex) {
         String mensagem = "O Agendamento não existe";

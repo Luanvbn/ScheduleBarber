@@ -5,31 +5,29 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-public class Client {
+public class Client extends Person  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
-    private Sex sex;
-
-    private LocalDate birthday;
-
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "access_id", referencedColumnName = "id")
     private Access access;
 
-    public Client(Long id, String name, Sex sex, LocalDate birthday, Access access) {
+    public Client(Long id, String name, Sex sex, String phone, String address, LocalDate birthday, Long id1, Access access) {
+        super(id, name, sex, phone, address, birthday);
+        this.id = id1;
+        this.access = access;
+    }
+
+    public Client(Long id, Access access) {
         this.id = id;
-        this.name = name;
-        this.sex = sex;
-        this.birthday = birthday;
         this.access = access;
     }
 
     public Client() {
+
     }
 
     public Long getId() {
@@ -38,30 +36,6 @@ public class Client {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Sex getSex() {
-        return sex;
-    }
-
-    public void setSex(Sex sex) {
-        this.sex = sex;
-    }
-
-    public LocalDate getBirthday() {
-        return birthday;
-    }
-
-    public void setBirthday(LocalDate birthday) {
-        this.birthday = birthday;
     }
 
     public Access getAccess() {
@@ -76,9 +50,6 @@ public class Client {
     public String toString() {
         return "Client{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
-                ", sex=" + sex +
-                ", birthday=" + birthday +
                 ", access=" + access +
                 '}';
     }

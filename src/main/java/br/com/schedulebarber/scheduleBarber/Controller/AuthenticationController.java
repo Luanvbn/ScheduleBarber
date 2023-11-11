@@ -6,6 +6,7 @@ import br.com.schedulebarber.scheduleBarber.DTO.AuthenticationResponse;
 import br.com.schedulebarber.scheduleBarber.DTO.RegisterRequest;
 import br.com.schedulebarber.scheduleBarber.Exception.AccessAlreadyExistsException;
 import br.com.schedulebarber.scheduleBarber.Exception.AccessNotExistsException;
+import br.com.schedulebarber.scheduleBarber.Exception.AccessNotFoundException;
 import br.com.schedulebarber.scheduleBarber.Model.Barber;
 import br.com.schedulebarber.scheduleBarber.Model.Client;
 import br.com.schedulebarber.scheduleBarber.Repository.AccessRepository;
@@ -32,7 +33,7 @@ public class AuthenticationController {
 
     @PostMapping("/registerBarber")
     public ResponseEntity<AuthenticationResponse> registerBarber(@RequestBody Barber barber) throws AccessAlreadyExistsException {
-            return ResponseEntity.ok(service.registerBarber(barber));
+        return ResponseEntity.ok(service.registerBarber(barber));
     }
 
     @PostMapping("/registerClient")
@@ -40,15 +41,16 @@ public class AuthenticationController {
         return ResponseEntity.ok(service.registerClient(client));
     }
 
+
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authentication(@RequestBody AuthenticationRequest authentication) throws AccessNotExistsException {
-        if (!accessRepository.existsByEmail(authentication.getEmail())) {
-            throw new AccessNotExistsException();
-        } else{
+    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest authentication) {
+        try {
             return ResponseEntity.ok(service.authenticate(authentication));
-
+        } catch (AccessNotFoundException e) {
+            return ResponseEntity.status(401).build(); // Unauthorized
+        } catch (Exception e) {
+            // Trate outras exceções aqui, se necessário
+            throw new RuntimeException(e);
         }
-
     }
-
 }
