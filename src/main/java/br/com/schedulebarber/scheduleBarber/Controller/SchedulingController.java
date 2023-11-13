@@ -18,13 +18,13 @@ import java.util.Optional;
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/scheduling")
-public class SchedulingController {
+public class SchedulingController implements BaseController<SchedulingRequest> {
 
     @Autowired
     private SchedulingService schedulingService;
 
     @PostMapping("/findAllScheduling")
-    public ResponseEntity<?>  findAllScheduling(@RequestBody PaginationParams params){
+    public ResponseEntity<?>  findAll(@RequestBody PaginationParams params){
         Page<Scheduling> schedulings = schedulingService.findAllScheduling(params);
         return ResponseEntity.ok(schedulings);
     }
@@ -36,19 +36,19 @@ public class SchedulingController {
     }
 
     @PostMapping("/createScheduling")
-    public ResponseEntity<?> saveSchedulling (@RequestBody SchedulingRequest scheduling) throws BarberNotExistsException, ClientNotExistsException, BarberDoesNotHaveService, SchedulingConflictException {
+    public ResponseEntity<?> save (@RequestBody SchedulingRequest scheduling) throws BarberNotExistsException, ClientNotExistsException, BarberDoesNotHaveService, SchedulingConflictException {
         Scheduling schedulingCreate = schedulingService.createScheduling(scheduling);
         return ResponseEntity.ok(schedulingCreate);
     }
 
     @PutMapping ("/update/{id}")
-    public ResponseEntity<?> updateScheduling(@PathVariable Long id, @RequestBody SchedulingRequest schedulingRequest) throws SchedulingNotExistsException, BarberNotExistsException, ClientNotExistsException, BarberDoesNotHaveService, SchedulingConflictException {
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody SchedulingRequest schedulingRequest) throws SchedulingNotExistsException, BarberNotExistsException, ClientNotExistsException, BarberDoesNotHaveService, SchedulingConflictException {
         Scheduling schedulingUpdated = schedulingService.updateScheduling(id, schedulingRequest);
         return ResponseEntity.ok().body(schedulingUpdated);
     }
 
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<?>  deleteScheduling (@PathVariable Long id) throws SchedulingNotExistsException {
+    public ResponseEntity<?> delete (@PathVariable Long id) throws SchedulingNotExistsException {
         Scheduling scheduling = schedulingService.schedulingDelete(id);
         return ResponseEntity.ok().body(scheduling);
     }

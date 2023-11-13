@@ -18,19 +18,19 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/client")
 @CrossOrigin
-public class ClientController {
+public class ClientController implements BaseController<Client>{
 
     @Autowired
     private ClientService clientService;
 
     @GetMapping ("/name/{name}")
-    public ResponseEntity<?>  findClientByName(@PathVariable("name") String name) throws ClientNotExistsException {
+    public ResponseEntity<?>  findByName(@PathVariable("name") String name) throws ClientNotExistsException {
         Client cliente = clientService.findClientByName(name);
         return ResponseEntity.ok(cliente);
     }
 
     @PostMapping ("/findAllClient")
-    public ResponseEntity<?>  findAllClients(@RequestBody() PaginationParams params) {
+    public ResponseEntity<?>  findAll(@RequestBody() PaginationParams params) {
         Page<Client> clients = clientService.findAllClients(params);
         return ResponseEntity.ok(clients);
 
@@ -41,22 +41,24 @@ public class ClientController {
         return ResponseEntity.ok(cliente);
     }
     @PutMapping ("/update/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Client cliente) throws ClientNotExistsException {
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Client cliente) throws ClientNotExistsException {
         Client client = clientService.updateClient(id, cliente);
         return ResponseEntity.ok().body(client);
     }
 
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<?>  deleteUser (@PathVariable Long id) throws ClientNotExistsException {
+    public ResponseEntity<?>  delete (@PathVariable Long id) throws ClientNotExistsException {
         Client client = clientService.deleteClient(id);
         return ResponseEntity.ok().body(client);
     }
 
     @GetMapping("/getscheduling/{id}")
-    public ResponseEntity<?> getAgendamentoClient(@PathVariable Long id) {
+    public ResponseEntity<?> getAgendamento(@PathVariable Long id) {
         List<Scheduling> scheduling = clientService.getAgendamentosDoCliente(id);
         return ResponseEntity.ok().body(scheduling);
     }
+
+
 
 
 

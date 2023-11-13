@@ -13,11 +13,10 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/service")
 @CrossOrigin()
-public class ServiceController {
+public class ServiceController implements BaseController<Servico> {
 
     @Autowired
     private ServicoService servicoService;
-
 
     @GetMapping("/id/{id}")
     public ResponseEntity<?>  findById(@PathVariable("id") Long id) throws ServicoNotExistsException {
@@ -26,19 +25,19 @@ public class ServiceController {
     }
 
     @PostMapping("/save/{id}")
-    public ResponseEntity<?> createService(@PathVariable("id") Long id, @RequestBody Servico servico) throws ServicoAlreadyExistsException {
+    public ResponseEntity<?> save (@PathVariable("id") Long id, @RequestBody Servico servico) throws ServicoAlreadyExistsException {
         Servico servicoSaved = servicoService.createServico(id, servico);
         return ResponseEntity.ok(servicoSaved);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateService(@PathVariable("id") Long id, @RequestBody Servico servico) throws ServicoNotExistsException {
+    public ResponseEntity<?> update(@PathVariable("id") Long id, @RequestBody Servico servico) throws ServicoNotExistsException {
         Servico servicoSaved = servicoService.updateServico(id, servico);
         return ResponseEntity.ok(servicoSaved);
     }
 
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<?>  deleteService (@PathVariable Long id) throws ServicoNotExistsException {
+    public ResponseEntity<?>  delete (@PathVariable Long id) throws ServicoNotExistsException {
         Servico servico = servicoService.deleteServico(id);
         return ResponseEntity.ok().body(servico);
     }
