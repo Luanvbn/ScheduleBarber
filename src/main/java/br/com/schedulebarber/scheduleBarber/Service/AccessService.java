@@ -5,6 +5,7 @@ import br.com.schedulebarber.scheduleBarber.Model.Access;
 import br.com.schedulebarber.scheduleBarber.Repository.AccessRepository;
 import br.com.schedulebarber.scheduleBarber.Repository.RoleRepository;
 import br.com.schedulebarber.scheduleBarber.Util.BcryptUtils;
+import br.com.schedulebarber.scheduleBarber.Util.RemovedAcent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,13 +31,7 @@ public class AccessService {
         Access existingAccess = accessRepository.findById(id)
                 .orElseThrow(AccessNotExistsException::new);
 
-        if (updatedAccess.getEmail() != null) {
-            existingAccess.setEmail(removerAcento(updatedAccess.getEmail()));
-        }
-
-        if (updatedAccess.getPassword() != null) {
-            existingAccess.setPassword(BcryptUtils.encode(updatedAccess.getPassword()));
-        }
+        updateAccessFields(existingAccess, updatedAccess);
 
         return accessRepository.save(existingAccess);
     }
@@ -47,6 +42,17 @@ public class AccessService {
 
         accessRepository.deleteById(id);
         return existingAccess;
+    }
+
+
+    private void updateAccessFields(Access existingAccess, Access updatedAccess) {
+        if (updatedAccess.getEmail() != null) {
+            existingAccess.setEmail(removerAcento(updatedAccess.getEmail()));
+        }
+
+        if (updatedAccess.getPassword() != null) {
+            existingAccess.setPassword(BcryptUtils.encode(updatedAccess.getPassword()));
+        }
     }
 
 
