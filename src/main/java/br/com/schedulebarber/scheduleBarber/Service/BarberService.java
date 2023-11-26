@@ -2,10 +2,7 @@ package br.com.schedulebarber.scheduleBarber.Service;
 
 import br.com.schedulebarber.scheduleBarber.Exception.AccessAlreadyExistsException;
 import br.com.schedulebarber.scheduleBarber.Exception.BarberNotExistsException;
-import br.com.schedulebarber.scheduleBarber.Model.Barber;
-import br.com.schedulebarber.scheduleBarber.Model.Client;
-import br.com.schedulebarber.scheduleBarber.Model.Role;
-import br.com.schedulebarber.scheduleBarber.Model.Scheduling;
+import br.com.schedulebarber.scheduleBarber.Model.*;
 import br.com.schedulebarber.scheduleBarber.Repository.AccessRepository;
 import br.com.schedulebarber.scheduleBarber.Repository.BarberRepository;
 import br.com.schedulebarber.scheduleBarber.Repository.RoleRepository;
@@ -19,10 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+
 
 import static br.com.schedulebarber.scheduleBarber.Util.RemovedAcent.removerAcento;
 
@@ -44,71 +40,56 @@ public class BarberService {
     public Barber findClientByName(String name) throws BarberNotExistsException {
         Barber barber = barberRepository.findByNameContainingIgnoreCase(name);
         if (barber != null) {
-            return barberRepository.findByNameContainingIgnoreCase(name);
+            return barber;
         } else {
             throw new BarberNotExistsException();
         }
     }
 
     public Page<Barber> findAllBarber(PaginationParams params) {
-        Sort sort = params.getSortOrder().equalsIgnoreCase("asc") ?
-                Sort.by(params.getSortProperty()).ascending() : Sort.by(params.getSortProperty()).descending();
+        Sort sort = Sort.by(params.getSortOrder().equalsIgnoreCase("asc") ?
+                Sort.Order.asc(params.getSortProperty()) : Sort.Order.desc(params.getSortProperty()));
         Pageable pageable = PageRequest.of(params.getPage(), params.getSize(), sort);
-        Page<Barber> barbers = barberRepository.findAll(pageable);
-        return barbers;
+        return barberRepository.findAll(pageable);
     }
 
     public Optional<Barber> findClientById(Long id) throws BarberNotExistsException {
         Optional<Barber> barberOptional = barberRepository.findById(id);
         if (barberOptional.isPresent()) {
-            return barberRepository.findById(id);
+            return barberOptional;
+        } else {
+            throw new BarberNotExistsException();
+        }
+    }
+
+    public Barber updateBarber(Long id, Barber updatedBarber) throws BarberNotExistsException {
+        Optional<Barber> barberOptional = barberRepository.findById(id);
+        Barber existingBarber = barberOptional.orElseThrow(BarberNotExistsException::new);
+
+        if (accessRepository.existsByEmail(existingBarber.getAccess().getEmail())) {
+            updateBarberFields(existingBarber, updatedBarber);
+            return barberRepository.save(existingBarber);
         } else {
             throw new BarberNotExistsException();
         }
     }
 
 
-    public Barber updateBarber(Long id, Barber barber) throws BarberNotExistsException {
-        Optional<Barber> barberOptional = barberRepository.findById(id);
-        Barber existingBarber = barberOptional.orElseThrow(BarberNotExistsException::new);
-        if (barberOptional.isPresent()) {
+    private void updateBarberFields(Barber existingBarber, Barber updatedBarber) {
+        existingBarber.setName(updatedBarber.getName() != null ? removerAcento(updatedBarber.getName()) : existingBarber.getName());
+        existingBarber.setBirthday(updatedBarber.getBirthday() != null ? updatedBarber.getBirthday() : existingBarber.getBirthday());
+        existingBarber.setSex(updatedBarber.getSex() != null ? updatedBarber.getSex() : existingBarber.getSex());
+        existingBarber.setAddress(updatedBarber.getAddress() != null ? updatedBarber.getAddress() : existingBarber.getAddress());
+        existingBarber.setPhone(updatedBarber.getPhone() != null ? updatedBarber.getPhone() : existingBarber.getPhone());
+        existingBarber.setServicos(updatedBarber.getServicos() != null ? updatedBarber.getServicos() : existingBarber.getServicos());
 
-            if (accessRepository.existsByEmail(barberOptional.get().getAccess().getEmail())) {
-                if (barber.getName() != null) {
-                    existingBarber.setName(removerAcento(barber.getName()));
-                }
-                if (barber.getBirthday() != null) {
-                    existingBarber.setBirthday(barber.getBirthday());
-                }
-                if (barber.getSex() != null) {
-                    existingBarber.setSex(barber.getSex());
-                }
-                if (barber.getAddress() != null) {
-                    existingBarber.setAddress(barber.getAddress());
-                }
-                if (barber.getPhone() != null) {
-                    existingBarber.setPhone(barber.getPhone());
-                }
+        Access updatedAccess = updatedBarber.getAccess();
+        Access existingAccess = existingBarber.getAccess();
 
-                if (barber.getServicos() != null) {
-                    existingBarber.setServicos(barber.getServicos());
-                }
-                if (barber.getAccess() != null) {
-                    if (barber.getAccess().getEmail() != null) {
-                        existingBarber.getAccess().setEmail(barber.getAccess().getEmail());
-                    }
-                    if (barber.getAccess().getPassword() != null) {
-                        existingBarber.getAccess().setPassword(BcryptUtils.encode(barber.getAccess().getPassword()));
-                    }
-                }
-
-                Barber barberSave = barberRepository.save(existingBarber);
-                return barberRepository.save(barberSave);
-            }
-        } else {
-            throw new BarberNotExistsException();
+        if (updatedAccess != null) {
+            existingAccess.setEmail(updatedAccess.getEmail() != null ? updatedAccess.getEmail() : existingAccess.getEmail());
+            existingAccess.setPassword(updatedAccess.getPassword() != null ? BcryptUtils.encode(updatedAccess.getPassword()) : existingAccess.getPassword());
         }
-        throw new BarberNotExistsException();
     }
 
     public Barber deleteBarber(Long id) throws BarberNotExistsException {

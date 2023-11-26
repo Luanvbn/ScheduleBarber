@@ -56,99 +56,110 @@ public class SchedulingService {
     }
 
     public Scheduling createScheduling(SchedulingRequest schedulingRequest) throws ClientNotExistsException, BarberNotExistsException, BarberDoesNotHaveService, SchedulingConflictException {
-        Client client = clientRepository.findById(schedulingRequest.getClientId()).orElseThrow(ClientNotExistsException::new);
-        Barber barber = barberRepository.findById(schedulingRequest.getBarberId()).orElseThrow(BarberNotExistsException::new);
-        List<Servico> servicos = servicoRepository.findByIdIn(schedulingRequest.getServiceIds());
+        Client client = getClientById(schedulingRequest.getClientId());
+        Barber barber = getBarberById(schedulingRequest.getBarberId());
+        List<Servico> servicos = getServicosByIds(schedulingRequest.getServiceIds(), barber);
 
-        boolean hasService = !servicos.isEmpty();
+        checkServiceBelongsToBarber(servicos, barber);
+        checkSchedulingConflicts(schedulingRequest.getScheduling().getDataInicio(), schedulingRequest.getScheduling().getDatafim(), barber);
+
+        Scheduling saveScheduling = createAndSaveScheduling(client, barber, schedulingRequest.getScheduling().getDataInicio(), schedulingRequest.getScheduling().getDatafim(), servicos);
+
+        return saveScheduling;
+    }
+
+    private void checkServiceBelongsToBarber(List<Servico> servicos, Barber barber) throws BarberDoesNotHaveService {
         for (Servico servico : servicos) {
             if (!servico.getBarber().equals(barber)) {
-                throw new BarberDoesNotHaveService("Serviço " + servico.getNomeServico() + "não pertence ao barbeiro selecionado");
+                throw new BarberDoesNotHaveService("Serviço " + servico.getNomeServico() + " não pertence ao barbeiro selecionado");
             }
-        }
-
-        if (hasService) {
-            LocalDateTime DataInicio = schedulingRequest.getScheduling().getDataInicio();
-            LocalDateTime DataFim = schedulingRequest.getScheduling().getDatafim();
-
-            List<Scheduling> existingSchedulings = schedulingRepository.findByBarber(barber);
-            for (Scheduling existingScheduling : existingSchedulings) {
-                LocalDateTime existingDataInicio = existingScheduling.getDataInicio();
-                LocalDateTime existingDataFim = existingScheduling.getDatafim();
-                if (DataInicio.isBefore(existingDataFim) && DataFim.isAfter(existingDataInicio)) {
-                    throw new SchedulingConflictException("Já existe um agendamento no mesmo período");
-                }
-            }
-
-
-            Scheduling saveScheduling = new Scheduling();
-            saveScheduling.setClient(client);
-            saveScheduling.setBarber(barber);
-            saveScheduling.setDataInicio(schedulingRequest.getScheduling().getDataInicio());
-            saveScheduling.setDatafim(schedulingRequest.getScheduling().getDatafim());
-            saveScheduling.setServicos(servicos);
-
-            return schedulingRepository.save(saveScheduling);
-        } else {
-            throw new BarberDoesNotHaveService("Algum(s) dos serviços não pertence ao barbeiro selecionado");
         }
     }
 
-    public Scheduling updateScheduling(Long schedulingId, SchedulingRequest schedulingRequest) throws SchedulingNotExistsException, ClientNotExistsException, BarberNotExistsException, BarberDoesNotHaveService, SchedulingConflictException {
-        Scheduling existingScheduling = schedulingRepository.findById(schedulingId).orElseThrow(SchedulingNotExistsException::new);
+    private void checkSchedulingConflicts(LocalDateTime dataInicio, LocalDateTime dataFim, Barber barber) throws SchedulingConflictException {
+        List<Scheduling> existingSchedulings = schedulingRepository.findByBarber(barber);
+        for (Scheduling existingScheduling : existingSchedulings) {
+            LocalDateTime existingDataInicio = existingScheduling.getDataInicio();
+            LocalDateTime existingDataFim = existingScheduling.getDatafim();
+            if (dataInicio.isBefore(existingDataFim) && dataFim.isAfter(existingDataInicio)) {
+                throw new SchedulingConflictException("Já existe um agendamento no mesmo período");
+            }
+        }
+    }
 
-        // Verificar e atualizar o campo "client" se estiver presente na requisição
+    private Scheduling createAndSaveScheduling(Client client, Barber barber, LocalDateTime dataInicio, LocalDateTime dataFim, List<Servico> servicos) {
+        Scheduling saveScheduling = new Scheduling();
+        saveScheduling.setClient(client);
+        saveScheduling.setBarber(barber);
+        saveScheduling.setDataInicio(dataInicio);
+        saveScheduling.setDatafim(dataFim);
+        saveScheduling.setServicos(servicos);
+        return schedulingRepository.save(saveScheduling);
+    }
+
+    private List<Servico> getServicosByIds(List<Long> serviceIds, Barber barber) throws BarberDoesNotHaveService {
+        List<Servico> servicos = servicoRepository.findByIdIn(serviceIds);
+
+        if (servicos.isEmpty()) {
+            throw new BarberDoesNotHaveService("Nenhum serviço foi selecionado para o barbeiro");
+        }
+
+        return servicos;
+    }
+
+    private Barber getBarberById(Long barberId) throws BarberNotExistsException {
+        return barberRepository.findById(barberId).orElseThrow(BarberNotExistsException::new);
+    }
+
+    private Client getClientById(Long clientId) throws ClientNotExistsException {
+        return clientRepository.findById(clientId).orElseThrow(ClientNotExistsException::new);
+    }
+
+    public Scheduling updateScheduling(Long schedulingId, SchedulingRequest schedulingRequest) throws SchedulingNotExistsException, ClientNotExistsException, BarberNotExistsException, BarberDoesNotHaveService, SchedulingConflictException {
+        Scheduling existingScheduling = getSchedulingById(schedulingId);
+
+        updateClientIfPresent(schedulingRequest, existingScheduling);
+        updateBarberIfPresent(schedulingRequest, existingScheduling);
+        updateSchedulingDatesIfPresent(schedulingRequest, existingScheduling);
+        updateServicesIfPresent(schedulingRequest, existingScheduling);
+
+        return schedulingRepository.save(existingScheduling);
+    }
+
+    private void updateClientIfPresent(SchedulingRequest schedulingRequest, Scheduling existingScheduling) throws ClientNotExistsException {
         if (schedulingRequest.getClientId() != null) {
-            Client client = clientRepository.findById(schedulingRequest.getClientId()).orElseThrow(ClientNotExistsException::new);
+            Client client = getClientById(schedulingRequest.getClientId());
             existingScheduling.setClient(client);
         }
+    }
 
-        // Verificar e atualizar o campo "barber" se estiver presente na requisição
+    private void updateBarberIfPresent(SchedulingRequest schedulingRequest, Scheduling existingScheduling) throws BarberNotExistsException {
         if (schedulingRequest.getBarberId() != null) {
-            Barber barber = barberRepository.findById(schedulingRequest.getBarberId()).orElseThrow(BarberNotExistsException::new);
+            Barber barber = getBarberById(schedulingRequest.getBarberId());
             existingScheduling.setBarber(barber);
         }
+    }
 
-        // Verificar e atualizar os campos "dataInicio" e "dataFim" se estiverem presentes na requisição
+    private void updateSchedulingDatesIfPresent(SchedulingRequest schedulingRequest, Scheduling existingScheduling) throws SchedulingConflictException {
         if (schedulingRequest.getScheduling() != null) {
             LocalDateTime dataInicio = schedulingRequest.getScheduling().getDataInicio();
             LocalDateTime dataFim = schedulingRequest.getScheduling().getDatafim();
-
-            // Verificar conflitos de horário com outros agendamentos existentes
-            List<Scheduling> existingSchedulings = schedulingRepository.findByBarber(existingScheduling.getBarber());
-            for (Scheduling otherScheduling : existingSchedulings) {
-                if (!otherScheduling.equals(existingScheduling)) {
-                    LocalDateTime otherDataInicio = otherScheduling.getDataInicio();
-                    LocalDateTime otherDataFim = otherScheduling.getDatafim();
-                    if (dataInicio.isBefore(otherDataFim) && dataFim.isAfter(otherDataInicio)) {
-                        throw new SchedulingConflictException("Já existe um agendamento no mesmo período");
-                    }
-                }
-            }
-
+            checkSchedulingConflicts(dataInicio, dataFim, existingScheduling.getBarber());
             existingScheduling.setDataInicio(dataInicio);
             existingScheduling.setDatafim(dataFim);
         }
+    }
 
-        // Verificar e atualizar o campo "serviceIds" se estiver presente na requisição
+    private void updateServicesIfPresent(SchedulingRequest schedulingRequest, Scheduling existingScheduling) throws BarberDoesNotHaveService {
         if (schedulingRequest.getServiceIds() != null) {
-            List<Servico> servicos = servicoRepository.findByIdIn(schedulingRequest.getServiceIds());
-
-            boolean hasService = !servicos.isEmpty();
-            for (Servico servico : servicos) {
-                if (!servico.getBarber().equals(existingScheduling.getBarber())) {
-                    throw new BarberDoesNotHaveService("Serviço " + servico.getNomeServico() + " não pertence ao barbeiro selecionado");
-                }
-            }
-
-            if (hasService) {
-                existingScheduling.setServicos(servicos);
-            } else {
-                throw new BarberDoesNotHaveService("Algum(s) dos serviços não pertence ao barbeiro selecionado");
-            }
+            List<Servico> servicos = getServicosByIds(schedulingRequest.getServiceIds(), existingScheduling.getBarber());
+            checkServiceBelongsToBarber(servicos, existingScheduling.getBarber());
+            existingScheduling.setServicos(servicos);
         }
+    }
 
-        return schedulingRepository.save(existingScheduling);
+    private Scheduling getSchedulingById(Long schedulingId) throws SchedulingNotExistsException {
+        return schedulingRepository.findById(schedulingId).orElseThrow(SchedulingNotExistsException::new);
     }
 
     public Scheduling schedulingDelete(Long id) throws SchedulingNotExistsException {

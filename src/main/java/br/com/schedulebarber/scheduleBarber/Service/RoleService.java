@@ -21,36 +21,33 @@ public class RoleService {
 
     public Optional<Role> findById(Long id) throws Exception {
         Optional<Role> roleOptional = roleRepository.findById(id);
-        if(roleOptional.isPresent()){
-            return roleRepository.findById(id);
+        if (roleOptional.isPresent()) {
+            return roleOptional;
         } else {
             throw new Exception();
         }
     }
 
     public Page<Role> findAllRoles(PaginationParams params) {
-        Sort sort = params.getSortOrder().equalsIgnoreCase("asc") ?
-                Sort.by(params.getSortProperty()).ascending() : Sort.by(params.getSortProperty()).descending();
+        Sort sort = Sort.by(params.getSortOrder().equalsIgnoreCase("asc") ?
+                Sort.Order.asc(params.getSortProperty()) : Sort.Order.desc(params.getSortProperty()));
         Pageable pageable = PageRequest.of(params.getPage(), params.getSize(), sort);
-        Page<Role> roles = roleRepository.findAll((Pageable) pageable);
-        return roles;
+        return roleRepository.findAll(pageable);
     }
 
     public Role createRole(Role role) throws Exception {
-        if (!roleRepository.existsByAuthority(role.getAuthority())) {
-            throw new Exception();
+        if (roleRepository.existsByAuthority(role.getAuthority())) {
+            throw new Exception("Role already exists");
         } else {
-            Role roleCreate = new Role();
-            roleCreate.setAuthority("BARBER");
-            return roleRepository.save(roleCreate);
+            return roleRepository.save(role);
         }
     }
 
     public Role updateRole(Long id, Role role) throws Exception {
-            Optional<Role> optionalRole = Optional.ofNullable(roleRepository.findByAuthority(role.getAuthority()));
-            Role existingRole = optionalRole.orElseThrow(Exception::new);
-            existingRole.setAuthority(role.getAuthority());
-            return roleRepository.save(existingRole);
+        Optional<Role> optionalRole = roleRepository.findById(id);
+        Role existingRole = optionalRole.orElseThrow(Exception::new);
+        existingRole.setAuthority(role.getAuthority());
+        return roleRepository.save(existingRole);
     }
 
     public Role deleteRole(Long id) throws Exception {

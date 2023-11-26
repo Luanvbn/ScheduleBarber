@@ -2,6 +2,7 @@ package br.com.schedulebarber.scheduleBarber.Service;
 
 import br.com.schedulebarber.scheduleBarber.Exception.AccessAlreadyExistsException;
 import br.com.schedulebarber.scheduleBarber.Exception.ClientNotExistsException;
+import br.com.schedulebarber.scheduleBarber.Model.Access;
 import br.com.schedulebarber.scheduleBarber.Model.Role;
 import br.com.schedulebarber.scheduleBarber.Model.Scheduling;
 import br.com.schedulebarber.scheduleBarber.Repository.AccessRepository;
@@ -39,68 +40,58 @@ public class ClientService {
 
     public Client findClientByName(String name) throws ClientNotExistsException {
         Client client = clientRepository.findByNameContainingIgnoreCase(name);
-        if(client != null){
-            return clientRepository.findByNameContainingIgnoreCase(name);
+        if (client != null) {
+            return client;
         } else {
             throw new ClientNotExistsException();
         }
     }
 
     public Page<Client> findAllClients(PaginationParams params) {
-        Sort sort = params.getSortOrder().equalsIgnoreCase("asc") ?
-                Sort.by(params.getSortProperty()).ascending() : Sort.by(params.getSortProperty()).descending();
+        Sort sort = Sort.by(params.getSortOrder().equalsIgnoreCase("asc") ?
+                Sort.Order.asc(params.getSortProperty()) : Sort.Order.desc(params.getSortProperty()));
         Pageable pageable = PageRequest.of(params.getPage(), params.getSize(), sort);
-        Page<Client> clients = clientRepository.findAll((Pageable) pageable);
-        return clients;
+        return clientRepository.findAll(pageable);
     }
 
     public Optional<Client> findClientById(Long id) throws ClientNotExistsException {
-        Optional<Client> client = clientRepository.findById(id);
-        if(client.isPresent()){
-            return clientRepository.findById(id);
+        Optional<Client> clientOptional = clientRepository.findById(id);
+        if (clientOptional.isPresent()) {
+            return clientOptional;
         } else {
             throw new ClientNotExistsException();
         }
     }
 
+    public Client updateClient(Long id, Client updatedClient) throws ClientNotExistsException {
+        Optional<Client> clientOptional = clientRepository.findById(id);
+        Client existingClient = clientOptional.orElseThrow(ClientNotExistsException::new);
 
-    public Client updateClient(Long id, Client client) throws ClientNotExistsException {
-            Optional<Client> clientOptional = clientRepository.findById(id);
-            Client existingClient = clientOptional.orElseThrow(ClientNotExistsException::new);
-        if(clientOptional.isPresent()){
-
-            if(accessRepository.existsByEmail(clientOptional.get().getAccess().getEmail())) {
-                if(client.getName() != null) {
-                    existingClient.setName(removerAcento(client.getName()));
-                }
-                if(client.getBirthday() != null ) {
-                    existingClient.setBirthday(client.getBirthday());
-                }
-                if (client.getSex() != null) {
-                    existingClient.setSex(client.getSex());
-                }
-
-                if(client.getAccess() != null) {
-                    if (client.getAccess().getEmail() != null) {
-                        existingClient.getAccess().setEmail(client.getAccess().getEmail());
-                    }
-                    if (client.getAccess().getPassword() != null) {
-                        existingClient.getAccess().setPassword(BcryptUtils.encode(client.getAccess().getPassword()));
-                    }
-                }
-
-                Client clienteSave = clientRepository.save(existingClient);
-                return clientRepository.save(clienteSave);
-            }
+        if (accessRepository.existsByEmail(existingClient.getAccess().getEmail())) {
+            updateClientFields(existingClient, updatedClient);
+            return clientRepository.save(existingClient);
         } else {
             throw new ClientNotExistsException();
         }
-        throw new ClientNotExistsException();
+    }
+
+    private void updateClientFields(Client existingClient, Client updatedClient) {
+        existingClient.setName(updatedClient.getName() != null ? removerAcento(updatedClient.getName()) : existingClient.getName());
+        existingClient.setBirthday(updatedClient.getBirthday() != null ? updatedClient.getBirthday() : existingClient.getBirthday());
+        existingClient.setSex(updatedClient.getSex() != null ? updatedClient.getSex() : existingClient.getSex());
+
+        Access updatedAccess = updatedClient.getAccess();
+        Access existingAccess = existingClient.getAccess();
+
+        if (updatedAccess != null) {
+            existingAccess.setEmail(updatedAccess.getEmail() != null ? updatedAccess.getEmail() : existingAccess.getEmail());
+            existingAccess.setPassword(updatedAccess.getPassword() != null ? BcryptUtils.encode(updatedAccess.getPassword()) : existingAccess.getPassword());
+        }
     }
 
     public Client deleteClient(Long id) throws ClientNotExistsException {
         Optional<Client> clienteOptional = clientRepository.findById(id);
-        if(clienteOptional.isPresent()) {
+        if (clienteOptional.isPresent()) {
             Client existingClient = clienteOptional.get();
             clientRepository.deleteById(id);
             return existingClient;
@@ -115,8 +106,6 @@ public class ClientService {
 
         return schedulingRepository.findByClient(client);
     }
-
-
 
 
 }
