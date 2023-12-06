@@ -11,19 +11,14 @@ public class Client extends Person  {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "access_id", referencedColumnName = "id")
-    private Access access;
 
     public Client(Long id, String name, Sex sex, String phone, String address, LocalDate birthday, Long id1, Access access) {
-        super(id, name, sex, phone, address, birthday);
+        super(id, name, sex, phone, address, birthday, access);
         this.id = id1;
-        this.access = access;
     }
 
-    public Client(Long id, Access access) {
+    public Client(Long id) {
         this.id = id;
-        this.access = access;
     }
 
     public Client() {
@@ -38,19 +33,10 @@ public class Client extends Person  {
         this.id = id;
     }
 
-    public Access getAccess() {
-        return access;
-    }
-
-    public void setAccess(Access access) {
-        this.access = access;
-    }
-
     @Override
     public String toString() {
         return "Client{" +
                 "id=" + id +
-                ", access=" + access +
                 '}';
     }
 }

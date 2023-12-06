@@ -20,13 +20,19 @@ public class Person {
     private String address;
     private LocalDate birthday;
 
-    public Person(Long id, String name, Sex sex, String phone, String address, LocalDate birthday) {
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "access_id", referencedColumnName = "id")
+    private Access access;
+
+
+    public Person(Long id, String name, Sex sex, String phone, String address, LocalDate birthday, Access access) {
         this.id = id;
         this.name = name;
         this.sex = sex;
         this.phone = phone;
         this.address = address;
         this.birthday = birthday;
+        this.access = access;
     }
 
     public Person() {
@@ -79,5 +85,13 @@ public class Person {
 
     public void setBirthday(LocalDate birthday) {
         this.birthday = birthday;
+    }
+
+    public Access getAccess() {
+        return access;
+    }
+
+    public void setAccess(Access access) {
+        this.access = access;
     }
 }

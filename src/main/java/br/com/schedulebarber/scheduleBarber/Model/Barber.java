@@ -17,21 +17,15 @@ public class Barber extends Person {
     @JsonIgnoreProperties({"barber", "schedules"})
     private List<Servico> servicos;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "access_id", referencedColumnName = "id")
-    private Access access;
-
-    public Barber(Long id, String name, Sex sex, String phone, String address, LocalDate birthday, Long id1, List<Servico> servicos, Access access) {
-        super(id, name, sex, phone, address, birthday);
+    public Barber(Long id, String name, Sex sex, String phone, String address, LocalDate birthday, Access access, Long id1, List<Servico> servicos) {
+        super(id, name, sex, phone, address, birthday, access);
         this.id = id1;
         this.servicos = servicos;
-        this.access = access;
     }
 
-    public Barber(Long id, List<Servico> servicos, Access access) {
+    public Barber(Long id, List<Servico> servicos) {
         this.id = id;
         this.servicos = servicos;
-        this.access = access;
     }
 
     public Barber() {
@@ -44,14 +38,6 @@ public class Barber extends Person {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Access getAccess() {
-        return access;
-    }
-
-    public void setAccess(Access access) {
-        this.access = access;
     }
 
     public List<Servico> getServicos() {
